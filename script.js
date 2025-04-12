@@ -234,3 +234,6 @@ function deleteBoot() {
 }
 
 loadBoten();
+
+let wachtzoneBootTeller = 0; // ➔ Hou bij hoeveel boten in wachtzone staan
+
