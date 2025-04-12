@@ -103,7 +103,7 @@ function loadBoten() {
         });
       }
     });
-  }, 100); // kleine vertraging zodat alles klaar staat
+  }, 100); // <-- hier correct afsluiten
 }
 
 // Boot tekenen
