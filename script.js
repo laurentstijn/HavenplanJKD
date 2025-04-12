@@ -66,25 +66,24 @@ function drawBoot(svg, boot, id) {
 function selectBoot(boot, group, id) {
   selectedBoot = { boot, group, id };
 
-  // Eerst ALLE geselecteerde randen verwijderen
+  // Verwijder alle oude selectie
   document.querySelectorAll('.boot').forEach(boot => {
     boot.classList.remove('selected');
   });
 
-  // De boot binnen de geselecteerde groep highlighten
+  // Voeg 'selected' klasse toe aan de aangeklikte boot
   const bootRect = group.querySelector('.boot');
   if (bootRect) {
     bootRect.classList.add('selected');
   }
 
-  // Formulier invullen
+  // Vul formulier
   document.getElementById('naam').value = boot.naam || '';
   document.getElementById('lengte').value = boot.lengte || '';
   document.getElementById('breedte').value = boot.breedte || '';
   document.getElementById('eigenaar').value = boot.eigenaar || '';
   document.getElementById('status').value = boot.status || 'aanwezig';
 }
-
 
 // Functie om geselecteerde boot op te slaan
 function saveBoot() {
