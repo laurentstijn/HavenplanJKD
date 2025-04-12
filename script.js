@@ -1,36 +1,22 @@
 let selectedBoot = null;
+const database = firebase.database(); // Firebase database gebruiken
 
-// Boten inladen vanuit boten.json
-fetch('boten.json')
-.then(response => response.json())
-.then(data => {
+// Boten ophalen uit Firebase
+function loadBoten() {
   const svg = document.getElementById('haven');
 
-  data.boten.forEach((boot, index) => {
-    drawBoot(svg, boot, index);
-  });
-
-  // Klik op vrije ruimte om nieuwe boot toe te voegen
-  svg.addEventListener('click', (e) => {
-    if (
-      e.target.tagName === 'rect' && 
-      (e.target.classList.contains('boot') || e.target.classList.contains('steiger'))
-    ) {
-      return; // Klikte op een boot of steiger -> geen nieuwe boot maken
+  database.ref('boten').once('value').then((snapshot) => {
+    const data = snapshot.val();
+    if (data) {
+      Object.keys(data).forEach(id => {
+        const boot = data[id];
+        drawBoot(svg, boot, id);
+      });
     }
-
-    const svgRect = svg.getBoundingClientRect();
-    const x = e.clientX - svgRect.left;
-    const y = e.clientY - svgRect.top;
-
-    const svgX = (x / svgRect.width) * 800;
-    const svgY = (y / svgRect.height) * 600;
-
-    createNewBoot(svgX, svgY);
   });
-});
+}
 
-// Functie om bestaande boten te tekenen
+// Boot tekenen
 function drawBoot(svg, boot, id) {
   const group = document.createElementNS('http://www.w3.org/2000/svg', 'g');
   group.setAttribute('class', 'ligplaats');
@@ -58,22 +44,19 @@ function drawBoot(svg, boot, id) {
   svg.appendChild(group);
 }
 
-// Functie om geselecteerde boot te highlighten en formulier te vullen
+// Boot selecteren
 function selectBoot(boot, group, id) {
   selectedBoot = { boot, group, id };
 
-  // Verwijder oude selectie
   document.querySelectorAll('.boot').forEach(boot => {
     boot.classList.remove('selected');
   });
 
-  // Highlight de nieuwe geselecteerde boot
   const bootRect = group.querySelector('.boot');
   if (bootRect) {
     bootRect.classList.add('selected');
   }
 
-  // Formulier invullen
   document.getElementById('naam').value = boot.naam || '';
   document.getElementById('lengte').value = boot.lengte || '';
   document.getElementById('breedte').value = boot.breedte || '';
@@ -81,63 +64,84 @@ function selectBoot(boot, group, id) {
   document.getElementById('status').value = boot.status || 'aanwezig';
 }
 
-// Functie om geselecteerde boot op te slaan
+// Boot opslaan naar Firebase
 function saveBoot() {
   if (!selectedBoot) return;
-  const { group } = selectedBoot;
-  const boatRect = group.querySelector('.boot');
+  const { id, group } = selectedBoot;
+  const bootRect = group.querySelector('.boot');
   const bootLabel = group.querySelector('text');
 
   const naam = document.getElementById('naam').value;
   const lengte = parseFloat(document.getElementById('lengte').value);
   const breedte = parseFloat(document.getElementById('breedte').value);
+  const eigenaar = document.getElementById('eigenaar').value;
+  const status = document.getElementById('status').value;
+
+  const newBoot = {
+    naam,
+    lengte,
+    breedte,
+    eigenaar,
+    status,
+    x: parseFloat(bootRect.getAttribute('x')),
+    y: parseFloat(bootRect.getAttribute('y'))
+  };
 
   boatRect.setAttribute('width', lengte * 5);
   boatRect.setAttribute('height', breedte * 5);
-
   if (bootLabel) {
     bootLabel.textContent = naam;
   }
+
+  database.ref('boten/' + id).set(newBoot); // <-- Opslaan in database
 }
 
-// Functie om geselecteerde boot te verwijderen
+// Boot verwijderen uit Firebase
 function deleteBoot() {
   if (!selectedBoot) return;
-  const { group } = selectedBoot;
+  const { id, group } = selectedBoot;
+
+  database.ref('boten/' + id).remove(); // <-- Verwijderen uit database
   group.parentNode.removeChild(group);
   selectedBoot = null;
 }
 
-// Functie om nieuwe boot te maken bij klik
+// Nieuwe boot maken en opslaan
 function createNewBoot(x, y) {
   const svg = document.getElementById('haven');
-  const id = Date.now();
+  const id = database.ref().child('boten').push().key; // <-- Nieuw uniek ID van Firebase
 
-  const group = document.createElementNS('http://www.w3.org/2000/svg', 'g');
-  group.setAttribute('class', 'ligplaats');
-  group.setAttribute('data-id', id);
+  const newBoot = {
+    naam: "Nieuwe boot",
+    lengte: 12,
+    breedte: 4,
+    eigenaar: "",
+    status: "aanwezig",
+    x: x - 30,
+    y: y - 10
+  };
 
-  const boat = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
-  boat.setAttribute('x', x - 30);
-  boat.setAttribute('y', y - 10);
-  boat.setAttribute('width', 60);
-  boat.setAttribute('height', 20);
-  boat.setAttribute('class', 'boot');
-  boat.addEventListener('click', (event) => {
-    event.stopPropagation();
-    selectBoot({}, group, id);
-  });
-  group.appendChild(boat);
+  database.ref('boten/' + id).set(newBoot); // <-- Nieuwe boot opslaan in database
 
-  const label = document.createElementNS('http://www.w3.org/2000/svg', 'text');
-  label.setAttribute('x', x - 25);
-  label.setAttribute('y', y + 5);
-  label.setAttribute('class', 'label');
-  label.textContent = "Nieuwe boot";
-  group.appendChild(label);
-
-  svg.appendChild(group);
-
-  // Direct selecteren
-  selectBoot({}, group, id);
+  drawBoot(svg, newBoot, id);
 }
+
+// Klik op vrije ruimte ➔ nieuwe boot maken
+const svg = document.getElementById('haven');
+svg.addEventListener('click', (e) => {
+  if (e.target.tagName === 'rect' && (e.target.classList.contains('boot') || e.target.classList.contains('steiger'))) {
+    return; // Klikte op een boot of steiger, niet op lege ruimte
+  }
+
+  const svgRect = svg.getBoundingClientRect();
+  const x = e.clientX - svgRect.left;
+  const y = e.clientY - svgRect.top;
+
+  const svgX = (x / svgRect.width) * 800;
+  const svgY = (y / svgRect.height) * 600;
+
+  createNewBoot(svgX, svgY);
+});
+
+// 🚀 Start: laad boten bij begin
+loadBoten();
