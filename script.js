@@ -6,7 +6,7 @@ let startX, startY;
 const database = firebase.database();
 const schaalFactor = 3;
 
-// Haven tekenen: steigers, ligplaatsen, wachtzone
+// Haven tekenen
 function tekenBasisHaven() {
   const svg = document.getElementById('haven');
 
@@ -17,29 +17,17 @@ function tekenBasisHaven() {
   svg.setAttribute('viewBox', '0 0 1000 600');
 
   // Steigers
-  const steiger1 = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
-  steiger1.setAttribute('class', 'steiger');
-  steiger1.setAttribute('x', 50);
-  steiger1.setAttribute('y', 100);
-  steiger1.setAttribute('width', 500);
-  steiger1.setAttribute('height', 30);
-  svg.appendChild(steiger1);
-
-  const steiger2 = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
-  steiger2.setAttribute('class', 'steiger');
-  steiger2.setAttribute('x', 160);
-  steiger2.setAttribute('y', 130);
-  steiger2.setAttribute('width', 30);
-  steiger2.setAttribute('height', 400);
-  svg.appendChild(steiger2);
-
-  const steiger3 = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
-  steiger3.setAttribute('class', 'steiger');
-  steiger3.setAttribute('x', 400);
-  steiger3.setAttribute('y', 130);
-  steiger3.setAttribute('width', 30);
-  steiger3.setAttribute('height', 400);
-  svg.appendChild(steiger3);
+  const steigers = [
+    { x: 50, y: 100, width: 500, height: 30 },
+    { x: 160, y: 130, width: 30, height: 400 },
+    { x: 400, y: 130, width: 30, height: 400 }
+  ];
+  steigers.forEach(s => {
+    const rect = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
+    rect.setAttribute('class', 'steiger');
+    Object.entries(s).forEach(([k, v]) => rect.setAttribute(k, v));
+    svg.appendChild(rect);
+  });
 
   // Ligplaatsen
   for (let i = 0; i < 30; i++) {
@@ -48,14 +36,8 @@ function tekenBasisHaven() {
     rect.setAttribute('id', `ligplaats${i + 1}`);
     rect.setAttribute('width', 140);
     rect.setAttribute('height', 30);
-
-    if (i < 15) {
-      rect.setAttribute('x', 20);
-      rect.setAttribute('y', 140 + i * 35);
-    } else {
-      rect.setAttribute('x', 430);
-      rect.setAttribute('y', 140 + (i - 15) * 35);
-    }
+    rect.setAttribute('x', i < 15 ? 20 : 430);
+    rect.setAttribute('y', 140 + (i % 15) * 35);
     svg.appendChild(rect);
   }
 
@@ -69,7 +51,7 @@ function tekenBasisHaven() {
   wachtzone.setAttribute('height', 500);
   svg.appendChild(wachtzone);
 
-  // Ligplaatsen klikbaar maken
+  // Ligplaatsen klikbaar
   document.querySelectorAll('.ligplaats').forEach(ligplaats => {
     ligplaats.addEventListener('click', (e) => {
       e.stopPropagation();
@@ -85,7 +67,7 @@ function tekenBasisHaven() {
   });
 }
 
-// Boten laden na vertraging
+// Boten laden
 function loadBoten() {
   tekenBasisHaven();
 
@@ -144,7 +126,113 @@ function addBootToMenu(boot, id) {
   lijst.appendChild(div);
 }
 
-// Boot opslaan
+// Sleep starten
+function startDrag(e) {
+  document.querySelectorAll('.boot').forEach(b => b.classList.remove('selected'));
+  e.target.classList.add('selected');
+
+  selectedBoot = {
+    group: e.target.parentNode,
+    id: e.target.parentNode.getAttribute('data-id')
+  };
+
+  startX = e.clientX;
+  startY = e.clientY;
+  dragging = true;
+
+  document.addEventListener('mousemove', drag);
+  document.addEventListener('mouseup', endDrag);
+}
+
+// Tijdens slepen
+function drag(e) {
+  if (!selectedBoot) return;
+  const svg = document.getElementById('haven');
+  const pt = svg.createSVGPoint();
+  pt.x = e.clientX;
+  pt.y = e.clientY;
+  const cursorpt = pt.matrixTransform(svg.getScreenCTM().inverse());
+
+  const boot = selectedBoot.group.querySelector('.boot');
+  const label = selectedBoot.group.querySelector('text');
+
+  boot.setAttribute('x', cursorpt.x - 30);
+  boot.setAttribute('y', cursorpt.y - 10);
+  label.setAttribute('x', cursorpt.x - 25);
+  label.setAttribute('y', cursorpt.y + 5);
+}
+
+// Sleep stoppen
+function endDrag(e) {
+  dragging = false;
+  document.removeEventListener('mousemove', drag);
+  document.removeEventListener('mouseup', endDrag);
+
+  if (!selectedBoot) return;
+
+  const dx = e.clientX - startX;
+  const dy = e.clientY - startY;
+  const distance = Math.sqrt(dx * dx + dy * dy);
+
+  if (distance < 5) {
+    editBoot(selectedBoot.id);
+    return;
+  }
+
+  saveBoot();
+}
+
+// Boot opslaan na slepen
+function saveBoot() {
+  if (!selectedBoot) return;
+
+  const { id, group } = selectedBoot;
+  const bootRect = group.querySelector('.boot');
+  const bootLabel = group.querySelector('text');
+
+  database.ref('boten/' + id).once('value').then(snapshot => {
+    const oudeBoot = snapshot.val() || {};
+
+    const updatedBoot = {
+      naam: bootLabel.textContent || "Boot",
+      lengte: parseFloat(bootRect.getAttribute('width')) / schaalFactor,
+      breedte: parseFloat(bootRect.getAttribute('height')) / schaalFactor,
+      eigenaar: oudeBoot.eigenaar || "",
+      status: "aanwezig",
+      x: parseFloat(bootRect.getAttribute('x')),
+      y: parseFloat(bootRect.getAttribute('y')),
+      ligplaats: oudeBoot.ligplaats || ""
+    };
+
+    database.ref('boten/' + id).set(updatedBoot);
+  });
+}
+
+// Boot bewerken vanuit menu of klik
+function editBoot(id) {
+  database.ref('boten/' + id).once('value').then(snapshot => {
+    const boot = snapshot.val();
+    if (!boot) return;
+
+    geselecteerdeLigplaats = null;
+    editBootId = id;
+    document.getElementById('popupTitel').textContent = "Boot aanpassen";
+    document.getElementById('bootNaam').value = boot.naam;
+    document.getElementById('bootLengte').value = boot.lengte;
+    document.getElementById('bootBreedte').value = boot.breedte;
+    document.getElementById('bootEigenaar').value = boot.eigenaar || "";
+    document.getElementById('popup').style.display = 'block';
+  });
+}
+
+// Boot verwijderen
+function deleteBoot(id) {
+  if (confirm("Weet je zeker dat je deze boot wilt verwijderen?")) {
+    database.ref('boten/' + id).remove(() => location.reload());
+  }
+}
+
+// Popup Opslaan
 function bevestigBoot() {
   const naam = document.getElementById('bootNaam').value.trim();
   const lengte = parseFloat(document.getElementById('bootLengte').value) || 12;
@@ -157,20 +245,16 @@ function bevestigBoot() {
   }
 
   if (editBootId) {
-    // Bestaande boot aanpassen
     database.ref('boten/' + editBootId).once('value').then(snapshot => {
       const boot = snapshot.val();
       if (!boot) return;
-
       boot.naam = naam;
       boot.lengte = lengte;
       boot.breedte = breedte;
       boot.eigenaar = eigenaar;
-
       database.ref('boten/' + editBootId).set(boot, () => location.reload());
     });
   } else {
-    // Nieuwe boot toevoegen
     const id = database.ref().child('boten').push().key;
     const newBoot = {
       naam: naam,
@@ -186,7 +270,7 @@ function bevestigBoot() {
   }
 }
 
-// Popup sluiten
+// Popup Annuleren
 function annuleerBoot() {
   document.getElementById('popup').style.display = 'none';
 }
