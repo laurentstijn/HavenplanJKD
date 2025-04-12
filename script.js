@@ -10,29 +10,24 @@ const schaalFactor = 3;
 // Boten laden
 
 function loadBoten() {
-  tekenBasisHaven(); // Eerst haven tekenen
+  tekenBasisHaven(); // eerst haven tekenen
 
   const lijst = document.getElementById('botenLijst');
   lijst.innerHTML = '';
 
   setTimeout(() => {
-    
-setTimeout(() => {
-  database.ref('boten').once('value').then(snapshot => {
-
+    database.ref('boten').once('value').then(snapshot => {
       const data = snapshot.val();
       if (data) {
         Object.keys(data).forEach(id => {
           drawBoot(document.getElementById('haven'), data[id], id);
           addBootToMenu(data[id], id);
-        
-  });
-}, 100);
-
+        });
       }
     });
-  }, 50); // Kleine vertraging zodat SVG eerst klaar is
+  }, 100); // kleine vertraging zodat haven klaar is
 }
+
 
   const svg = document.getElementById('haven');
   const lijst = document.getElementById('botenLijst');
