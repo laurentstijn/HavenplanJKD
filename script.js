@@ -144,7 +144,6 @@ function endDrag(e) {
     let binnenLigplaats = false;
     let binnenWachtzone = false;
 
-    // Controleer alle ligplaatsen
     document.querySelectorAll('.ligplaats').forEach(ligplaats => {
       const lx = parseFloat(ligplaats.getAttribute('x'));
       const ly = parseFloat(ligplaats.getAttribute('y'));
@@ -155,6 +154,36 @@ function endDrag(e) {
         binnenLigplaats = true;
       }
     });
+
+    const wx = parseFloat(wachtzone.getAttribute('x'));
+    const wy = parseFloat(wachtzone.getAttribute('y'));
+    const ww = parseFloat(wachtzone.getAttribute('width'));
+    const wh = parseFloat(wachtzone.getAttribute('height'));
+
+    if (bootX >= wx && bootX <= wx + ww && bootY >= wy && bootY <= wy + wh) {
+      binnenWachtzone = true;
+    }
+
+    if (!binnenLigplaats && !binnenWachtzone) {
+      // ➔ Automatisch onder elkaar stapelen in wachtzone
+      const nieuweX = wx + 10;
+      const nieuweY = wy + 10 + (wachtzoneBootTeller * 50);
+
+      boot.setAttribute('x', nieuweX);
+      boot.setAttribute('y', nieuweY);
+      label.setAttribute('x', nieuweX + 5);
+      label.setAttribute('y', nieuweY + 20);
+
+      wachtzoneBootTeller += 1; // ➔ Volgende boot iets lager zetten
+    }
+
+    saveBoot();
+  }
+
+  document.removeEventListener('mousemove', drag);
+  document.removeEventListener('mouseup', endDrag);
+}
+
 
     // Controleer wachtzone
     const wx = parseFloat(wachtzone.getAttribute('x'));
