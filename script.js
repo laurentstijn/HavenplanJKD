@@ -1,9 +1,10 @@
 let selectedBoot = null;
 let dragging = false;
+let hasMoved = false;  // ➡️ Nieuw: om te checken of we echt bewogen hebben
 let offsetX, offsetY;
 const database = firebase.database();
 
-// 🚀 Laad boten uit Firebase
+// 🚀 Laad boten vanuit Firebase
 function loadBoten() {
   const svg = document.getElementById('haven');
 
@@ -44,7 +45,7 @@ function drawBoot(svg, boot, id) {
   svg.appendChild(group);
 }
 
-// ➡️ Alleen klik op ligplaats om nieuwe boot te maken
+// ➡️ Klik op ligplaats om nieuwe boot te maken
 document.querySelectorAll('.ligplaats').forEach(ligplaats => {
   ligplaats.addEventListener('click', async (e) => {
     e.stopPropagation();
@@ -59,6 +60,64 @@ document.querySelectorAll('.ligplaats').forEach(ligplaats => {
       return;
     }
 
-    // ➡️ Vraag info via pop-up
+    // 🎯 Pop-up om naam, lengte, breedte te vragen
     const naam = prompt("Naam van de boot:", "Nieuwe boot") || "Nieuwe boot";
-    const lengteInput = prompt("Lengte van de boot (m):
+    const lengteInput = prompt("Lengte van de boot (m):", "12");
+    const breedteInput = prompt("Breedte van de boot (m):", "4");
+
+    let lengte = parseFloat(lengteInput);
+    let breedte = parseFloat(breedteInput);
+
+    if (isNaN(lengte) || lengte <= 0) lengte = 12;
+    if (isNaN(breedte) || breedte <= 0) breedte = 4;
+
+    const id = database.ref().child('boten').push().key;
+
+    const newBoot = {
+      naam: naam,
+      lengte: lengte,
+      breedte: breedte,
+      eigenaar: "",
+      status: "aanwezig",
+      x: parseFloat(ligplaats.getAttribute('x')) + 10,
+      y: parseFloat(ligplaats.getAttribute('y')) + 5,
+      ligplaats: ligplaatsId
+    };
+
+    database.ref('boten/' + id).set(newBoot);
+
+    drawBoot(svg, newBoot, id);
+  });
+});
+
+// 🚚 Start slepen
+function startDrag(e) {
+  // Deselecteer alle boten
+  document.querySelectorAll('.boot').forEach(boot => {
+    boot.classList.remove('selected');
+  });
+
+  // Selecteer de aangeklikte boot
+  const clickedBoot = e.target;
+  clickedBoot.classList.add('selected');
+
+  selectedBoot = {
+    group: e.target.parentNode,
+    id: e.target.parentNode.getAttribute('data-id')
+  };
+
+  dragging = true;
+  hasMoved = false; // ➡️ Nieuw: reset bewegen
+
+  offsetX = e.offsetX;
+  offsetY = e.offsetY;
+
+  document.addEventListener('mousemove', drag);
+  document.addEventListener('mouseup', endDrag);
+}
+
+// 🚚 Sleepbeweging
+function drag(e) {
+  if (!dragging) return;
+
+  hasMoved = true; // ➡
