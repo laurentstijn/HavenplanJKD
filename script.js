@@ -1,4 +1,4 @@
-
+let wachtzoneBootTeller = 0; // ➔ Hou bij hoeveel boten in wachtzone staan
 let selectedBoot = null;
 let dragging = false;
 let startX = 0;
@@ -235,5 +235,5 @@ function deleteBoot() {
 
 loadBoten();
 
-let wachtzoneBootTeller = 0; // ➔ Hou bij hoeveel boten in wachtzone staan
+
 
