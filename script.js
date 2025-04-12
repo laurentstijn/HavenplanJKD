@@ -175,29 +175,17 @@ function editBoot(id) {
     const boot = snapshot.val();
     if (!boot) return;
 
-    const nieuweNaam = prompt("Nieuwe naam:", boot.naam);
-    if (nieuweNaam === null) return;
-
-    const nieuweLengte = prompt("Nieuwe lengte (meter):", boot.lengte);
-    if (nieuweLengte === null) return;
-
-    const nieuweBreedte = prompt("Nieuwe breedte (meter):", boot.breedte);
-    if (nieuweBreedte === null) return;
-
-    const nieuweEigenaar = prompt("Nieuwe eigenaar:", boot.eigenaar || "");
-    if (nieuweEigenaar === null) return;
-
-    const updatedBoot = {
-      ...boot,
-      naam: nieuweNaam.trim(),
-      lengte: parseFloat(nieuweLengte),
-      breedte: parseFloat(nieuweBreedte),
-      eigenaar: nieuweEigenaar.trim()
-    };
-
-    database.ref('boten/' + id).set(updatedBoot, () => location.reload());
+    geselecteerdeLigplaats = null; // Geen nieuwe ligplaats
+    editBootId = id; // Bestaande boot aanpassen
+    document.getElementById('popupTitel').textContent = "Boot aanpassen";
+    document.getElementById('bootNaam').value = boot.naam;
+    document.getElementById('bootLengte').value = boot.lengte;
+    document.getElementById('bootBreedte').value = boot.breedte;
+    document.getElementById('bootEigenaar').value = boot.eigenaar || "";
+    document.getElementById('popup').style.display = 'block';
   });
 }
+
 
 // Boot verwijderen
 function deleteBoot(id) {
