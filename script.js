@@ -20,24 +20,17 @@ function drawBoot(svg, boot, id) {
   rect.setAttribute('width', 120);
   rect.setAttribute('height', 30);
   rect.setAttribute('fill', '#88c0d0');
-  group.appendChild(rect);
 
   const boat = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
   boat.setAttribute('x', boot.x + 10);
   boat.setAttribute('y', boot.y + 5);
-  boat.setAttribute('width', (boot.lengte || 12) * 5);
-  boat.setAttribute('height', (boot.breedte || 4) * 5);
+  boat.setAttribute('width', boot.lengte * 5);
+  boat.setAttribute('height', boot.breedte * 5);
   boat.setAttribute('class', 'boot');
   boat.addEventListener('click', () => selectBoot(boot, group, id));
+
+  group.appendChild(rect);
   group.appendChild(boat);
-
-  const label = document.createElementNS('http://www.w3.org/2000/svg', 'text');
-  label.setAttribute('x', boot.x + 15);
-  label.setAttribute('y', boot.y + 20);
-  label.setAttribute('class', 'label');
-  label.textContent = boot.naam || 'Boot';
-  group.appendChild(label);
-
   svg.appendChild(group);
 }
 
@@ -54,7 +47,6 @@ function saveBoot() {
   if (!selectedBoot) return;
   const { group } = selectedBoot;
   const bootRect = group.querySelector('.boot');
-  const bootLabel = group.querySelector('text');
 
   const naam = document.getElementById('naam').value;
   const lengte = parseFloat(document.getElementById('lengte').value);
@@ -64,12 +56,7 @@ function saveBoot() {
 
   bootRect.setAttribute('width', lengte * 5);
   bootRect.setAttribute('height', breedte * 5);
-
-  if (bootLabel) {
-    bootLabel.textContent = naam;
-  }
 }
-
 
 function deleteBoot() {
   if (!selectedBoot) return;
