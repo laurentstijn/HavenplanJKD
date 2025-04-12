@@ -55,6 +55,7 @@ function saveBoot() {
   if (!selectedBoot) return;
   const { group } = selectedBoot;
   const bootRect = group.querySelector('.boot');
+  const bootLabel = group.querySelector('text');
 
   const naam = document.getElementById('naam').value;
   const lengte = parseFloat(document.getElementById('lengte').value);
@@ -64,6 +65,10 @@ function saveBoot() {
 
   bootRect.setAttribute('width', lengte * 5);
   bootRect.setAttribute('height', breedte * 5);
+
+  if (bootLabel) {
+    bootLabel.textContent = naam;
+  }
 }
 
 function deleteBoot() {
