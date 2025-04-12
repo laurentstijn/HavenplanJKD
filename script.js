@@ -1,48 +1,50 @@
-let wachtzoneBootTeller = 0; // ➔ Hou bij hoeveel boten in wachtzone staan
 let selectedBoot = null;
 let dragging = false;
 let startX = 0;
 let startY = 0;
+let wachtzoneBootTeller = 0; // Voor stapelen in wachtzone
 const database = firebase.database();
 
+// 🚀 Boten laden vanuit Firebase
 function loadBoten() {
   const svg = document.getElementById('haven');
-  database.ref('boten').once('value').then((snapshot) => {
+  database.ref('boten').once('value').then(snapshot => {
     const data = snapshot.val();
     if (data) {
       Object.keys(data).forEach(id => {
-        const boot = data[id];
-        drawBoot(svg, boot, id);
+        drawBoot(svg, data[id], id);
       });
     }
   });
 }
 
+// 🎨 Boot tekenen
 function drawBoot(svg, boot, id) {
   const group = document.createElementNS('http://www.w3.org/2000/svg', 'g');
   group.setAttribute('class', 'bootgroep');
   group.setAttribute('data-id', id);
   group.setAttribute('data-ligplaats', boot.ligplaats);
 
-  const boat = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
-  boat.setAttribute('x', boot.x);
-  boat.setAttribute('y', boot.y);
-  boat.setAttribute('width', (boot.lengte || 12) * 5);
-  boat.setAttribute('height', (boot.breedte || 4) * 5);
-  boat.setAttribute('class', 'boot');
-  boat.addEventListener('mousedown', startDrag);
-  group.appendChild(boat);
+  const rect = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
+  rect.setAttribute('x', boot.x);
+  rect.setAttribute('y', boot.y);
+  rect.setAttribute('width', (boot.lengte || 12) * 5);
+  rect.setAttribute('height', (boot.breedte || 4) * 5);
+  rect.setAttribute('class', 'boot');
+  rect.addEventListener('mousedown', startDrag);
+  group.appendChild(rect);
 
   const label = document.createElementNS('http://www.w3.org/2000/svg', 'text');
   label.setAttribute('x', boot.x + 5);
   label.setAttribute('y', boot.y + 20);
   label.setAttribute('class', 'label');
-  label.textContent = boot.naam || 'Boot';
+  label.textContent = boot.naam || "Boot";
   group.appendChild(label);
 
   svg.appendChild(group);
 }
 
+// ➡️ Klik op ligplaats om nieuwe boot toe te voegen
 document.querySelectorAll('.ligplaats').forEach(ligplaats => {
   ligplaats.addEventListener('click', async (e) => {
     e.stopPropagation();
@@ -50,23 +52,20 @@ document.querySelectorAll('.ligplaats').forEach(ligplaats => {
     const svg = document.getElementById('haven');
     const ligplaatsId = ligplaats.getAttribute('id');
 
+    // Check of ligplaats al bezet is
     const existingBoot = document.querySelector(`[data-ligplaats="${ligplaatsId}"]`);
     if (existingBoot) {
       alert('Deze ligplaats is al bezet!');
       return;
     }
 
-    // 🎯 Vraag gegevens
     const naam = prompt("Naam van de boot:", "Nieuwe boot");
-    if (naam === null || naam.trim() === "") {
-      // Als geannuleerd of leeg → stop
-      return;
-    }
+    if (naam === null || naam.trim() === "") return;
 
-    const lengteInput = prompt("Lengte van de boot (m):", "12");
+    const lengteInput = prompt("Lengte van de boot (meter):", "12");
     if (lengteInput === null) return;
 
-    const breedteInput = prompt("Breedte van de boot (m):", "4");
+    const breedteInput = prompt("Breedte van de boot (meter):", "4");
     if (breedteInput === null) return;
 
     let lengte = parseFloat(lengteInput);
@@ -78,7 +77,7 @@ document.querySelectorAll('.ligplaats').forEach(ligplaats => {
     const id = database.ref().child('boten').push().key;
 
     const newBoot = {
-      naam: naam.trim() || "Nieuwe boot",
+      naam: naam.trim(),
       lengte: lengte,
       breedte: breedte,
       eigenaar: "",
@@ -89,16 +88,13 @@ document.querySelectorAll('.ligplaats').forEach(ligplaats => {
     };
 
     database.ref('boten/' + id).set(newBoot);
-
     drawBoot(svg, newBoot, id);
   });
 });
 
-
+// 🚚 Start slepen
 function startDrag(e) {
-  document.querySelectorAll('.boot').forEach(boot => {
-    boot.classList.remove('selected');
-  });
+  document.querySelectorAll('.boot').forEach(boot => boot.classList.remove('selected'));
 
   const clickedBoot = e.target;
   clickedBoot.classList.add('selected');
@@ -116,6 +112,7 @@ function startDrag(e) {
   document.addEventListener('mouseup', endDrag);
 }
 
+// 🚚 Boot slepen
 function drag(e) {
   if (!dragging) return;
 
@@ -125,15 +122,16 @@ function drag(e) {
   pt.y = e.clientY;
   const cursorpt = pt.matrixTransform(svg.getScreenCTM().inverse());
 
-  const boot = selectedBoot.group.querySelector('.boot');
+  const rect = selectedBoot.group.querySelector('.boot');
   const label = selectedBoot.group.querySelector('text');
 
-  boot.setAttribute('x', cursorpt.x - 30);
-  boot.setAttribute('y', cursorpt.y - 10);
+  rect.setAttribute('x', cursorpt.x - 30);
+  rect.setAttribute('y', cursorpt.y - 10);
   label.setAttribute('x', cursorpt.x - 25);
   label.setAttribute('y', cursorpt.y + 5);
 }
 
+// 🚚 Stop slepen
 function endDrag(e) {
   dragging = false;
 
@@ -141,18 +139,20 @@ function endDrag(e) {
   const dy = e.clientY - startY;
   const distance = Math.sqrt(dx * dx + dy * dy);
 
-  const svg = document.getElementById('haven');
-  const wachtzone = document.getElementById('wachtzone');
-
   if (distance > 5) {
     const boot = selectedBoot.group.querySelector('.boot');
     const label = selectedBoot.group.querySelector('text');
-
     const bootX = parseFloat(boot.getAttribute('x'));
     const bootY = parseFloat(boot.getAttribute('y'));
 
+    const wachtzone = document.getElementById('wachtzone');
+    const wx = parseFloat(wachtzone.getAttribute('x'));
+    const wy = parseFloat(wachtzone.getAttribute('y'));
+    const ww = parseFloat(wachtzone.getAttribute('width'));
+    const wh = parseFloat(wachtzone.getAttribute('height'));
+
     let binnenLigplaats = false;
-    let binnenWachtzone = false;
+    let binnenWachtzone = (bootX >= wx && bootX <= wx + ww && bootY >= wy && bootY <= wy + wh);
 
     document.querySelectorAll('.ligplaats').forEach(ligplaats => {
       const lx = parseFloat(ligplaats.getAttribute('x'));
@@ -165,17 +165,7 @@ function endDrag(e) {
       }
     });
 
-    const wx = parseFloat(wachtzone.getAttribute('x'));
-    const wy = parseFloat(wachtzone.getAttribute('y'));
-    const ww = parseFloat(wachtzone.getAttribute('width'));
-    const wh = parseFloat(wachtzone.getAttribute('height'));
-
-    if (bootX >= wx && bootX <= wx + ww && bootY >= wy && bootY <= wy + wh) {
-      binnenWachtzone = true;
-    }
-
     if (!binnenLigplaats && !binnenWachtzone) {
-      // ➔ Automatisch onder elkaar stapelen in wachtzone
       const nieuweX = wx + 10;
       const nieuweY = wy + 10 + (wachtzoneBootTeller * 50);
 
@@ -184,7 +174,7 @@ function endDrag(e) {
       label.setAttribute('x', nieuweX + 5);
       label.setAttribute('y', nieuweY + 20);
 
-      wachtzoneBootTeller += 1; // ➔ Volgende boot iets lager zetten
+      wachtzoneBootTeller += 1;
     }
 
     saveBoot();
@@ -194,46 +184,7 @@ function endDrag(e) {
   document.removeEventListener('mouseup', endDrag);
 }
 
-
-    // Controleer wachtzone
-    const wx = parseFloat(wachtzone.getAttribute('x'));
-    const wy = parseFloat(wachtzone.getAttribute('y'));
-    const ww = parseFloat(wachtzone.getAttribute('width'));
-    const wh = parseFloat(wachtzone.getAttribute('height'));
-
-    if (bootX >= wx && bootX <= wx + ww && bootY >= wy && bootY <= wy + wh) {
-      binnenWachtzone = true;
-    }
-
-    // Als niet binnen ligplaats EN niet binnen wachtzone ➔ verplaatsen naar wachtzone
-    if (!binnenLigplaats && !binnenWachtzone) {
-      boot.setAttribute('x', wx + 10);
-      boot.setAttribute('y', wy + 10);
-      label.setAttribute('x', wx + 15);
-      label.setAttribute('y', wy + 30);
-    }
-
-    saveBoot();
-  }
-
-  document.removeEventListener('mousemove', drag);
-  document.removeEventListener('mouseup', endDrag);
-}
-
-    if (!binnenLigplaats) {
-      boot.setAttribute('x', parseFloat(wachtzone.getAttribute('x')) + 10);
-      boot.setAttribute('y', parseFloat(wachtzone.getAttribute('y')) + 10);
-      label.setAttribute('x', parseFloat(wachtzone.getAttribute('x')) + 15);
-      label.setAttribute('y', parseFloat(wachtzone.getAttribute('y')) + 30);
-    }
-
-    saveBoot();
-  }
-
-  document.removeEventListener('mousemove', drag);
-  document.removeEventListener('mouseup', endDrag);
-}
-
+// 💾 Boot opslaan
 function saveBoot() {
   if (!selectedBoot) return;
 
@@ -241,18 +192,10 @@ function saveBoot() {
   const bootRect = group.querySelector('.boot');
   const bootLabel = group.querySelector('text');
 
-  if (!bootRect) return;
-
-  let lengte = parseFloat(bootRect.getAttribute('width')) / 5;
-  let breedte = parseFloat(bootRect.getAttribute('height')) / 5;
-
-  if (isNaN(lengte) || lengte <= 0) lengte = 12;
-  if (isNaN(breedte) || breedte <= 0) breedte = 4;
-
   const updatedBoot = {
     naam: bootLabel.textContent || "Boot",
-    lengte: lengte,
-    breedte: breedte,
+    lengte: parseFloat(bootRect.getAttribute('width')) / 5,
+    breedte: parseFloat(bootRect.getAttribute('height')) / 5,
     eigenaar: "",
     status: "aanwezig",
     x: parseFloat(bootRect.getAttribute('x')),
@@ -263,16 +206,14 @@ function saveBoot() {
   database.ref('boten/' + id).set(updatedBoot);
 }
 
+// 🚮 Boot verwijderen
 function deleteBoot() {
   if (!selectedBoot) return;
   const { id, group } = selectedBoot;
-
   database.ref('boten/' + id).remove();
   group.parentNode.removeChild(group);
   selectedBoot = null;
 }
 
+// 🚀 Start direct
 loadBoten();
-
-
-
