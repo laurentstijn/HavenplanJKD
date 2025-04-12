@@ -130,3 +130,5 @@ function endDrag(e) {
 
   if (distance < 5) {
     // Kleine beweging ➔ behandelen als klik
+    }
+  }
