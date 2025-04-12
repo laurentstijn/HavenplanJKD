@@ -67,9 +67,15 @@ function selectBoot(boot, group, id) {
 // Boot opslaan naar Firebase
 function saveBoot() {
   if (!selectedBoot) return;
+  
   const { id, group } = selectedBoot;
-  const bootRect = group.querySelector('.boot');
+  const bootRect = group.querySelector('.boot'); // 👉 correcte variabele hier
   const bootLabel = group.querySelector('text');
+
+  if (!bootRect) {
+    console.error('Geen boot gevonden in de geselecteerde groep!');
+    return;
+  }
 
   const naam = document.getElementById('naam').value;
   const lengte = parseFloat(document.getElementById('lengte').value);
@@ -77,7 +83,6 @@ function saveBoot() {
   const eigenaar = document.getElementById('eigenaar').value;
   const status = document.getElementById('status').value;
 
-  // ✅ LET OP: bootRect, niet boatRect
   bootRect.setAttribute('width', lengte * 5);
   bootRect.setAttribute('height', breedte * 5);
 
@@ -85,7 +90,6 @@ function saveBoot() {
     bootLabel.textContent = naam;
   }
 
-  // Opslaan naar Firebase
   const updatedBoot = {
     naam,
     lengte,
