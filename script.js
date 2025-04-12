@@ -229,9 +229,5 @@ document.querySelectorAll('.ligplaats').forEach(ligplaats => {
 // 🚀 Start
 loadBoten();
 
-document.querySelectorAll('.ligplaats').forEach(ligplaats => {
-  ligplaats.addEventListener('click', (e) => {
-    console.log("Klik op ligplaats!");
-  });
-});
+
 
