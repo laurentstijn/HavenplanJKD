@@ -119,4 +119,45 @@ function endDrag(e) {
   document.removeEventListener('mouseup', endDrag);
 }
 
+// Klik op ligplaatsen om nieuwe boten toe te voegen
+document.querySelectorAll('.ligplaats').forEach(ligplaats => {
+  ligplaats.addEventListener('click', async (e) => {
+    e.stopPropagation();
+    const ligplaatsId = ligplaats.getAttribute('id');
+
+    const existingBoot = document.querySelector(`[data-ligplaats="${ligplaatsId}"]`);
+    if (existingBoot) {
+      alert('Deze ligplaats is al bezet!');
+      return;
+    }
+
+    const naam = prompt("Naam van de boot:", "Nieuwe boot");
+    if (naam === null || naam.trim() === "") return;
+
+    const lengteInput = prompt("Lengte van de boot (meter):", "12");
+    if (lengteInput === null) return;
+
+    const breedteInput = prompt("Breedte van de boot (meter):", "4");
+    if (breedteInput === null) return;
+
+    const lengte = parseFloat(lengteInput) || 12;
+    const breedte = parseFloat(breedteInput) || 4;
+    const id = database.ref().child('boten').push().key;
+
+    const newBoot = {
+      naam: naam.trim(),
+      lengte: lengte,
+      breedte: breedte,
+      eigenaar: "",
+      status: "aanwezig",
+      x: parseFloat(ligplaats.getAttribute('x')) + 10,
+      y: parseFloat(ligplaats.getAttribute('y')) + 5,
+      ligplaats: ligplaatsId
+    };
+
+    database.ref('boten/' + id).set(newBoot, () => location.reload());
+  });
+});
+
+
 loadBoten();
