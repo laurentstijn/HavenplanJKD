@@ -20,7 +20,7 @@ function tekenBasisHaven() {
   // Steigers
   const steigers = [
     { x: 50, y: 100, width: 500, height: 30 },
-    { x: 160, y: 130, width: 30, height: 400 },
+    { x: 130, y: 130, width: 30, height: 400 },
     { x: 400, y: 130, width: 30, height: 400 }
   ];
   steigers.forEach(s => {
