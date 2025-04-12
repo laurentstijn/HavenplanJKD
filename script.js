@@ -94,14 +94,15 @@ function startDrag(e) {
   e.target.classList.add('selected');
   selectedBoot = {
     group: e.target.parentNode,
-    id: e.target.parentNode.getAttribute('data-id')
+    id: e.target.parentNode.getAttribute('data-id'),
+    startX: e.clientX,
+    startY: e.clientY
   };
   dragging = true;
-  startX = e.clientX;
-  startY = e.clientY;
   document.addEventListener('mousemove', drag);
   document.addEventListener('mouseup', endDrag);
 }
+
 
 // ➡️ Tijdens slepen
 function drag(e) {
@@ -125,21 +126,19 @@ function endDrag(e) {
   document.removeEventListener('mousemove', drag);
   document.removeEventListener('mouseup', endDrag);
 
-  const boot = selectedBoot.group.querySelector('.boot');
-  const label = selectedBoot.group.querySelector('text');
-  const bootX = parseFloat(boot.getAttribute('x'));
-  const bootY = parseFloat(boot.getAttribute('y'));
+  const dx = e.clientX - selectedBoot.startX;
+  const dy = e.clientY - selectedBoot.startY;
+  const distance = Math.sqrt(dx * dx + dy * dy);
 
-  let binnenLigplaats = false;
-  document.querySelectorAll('.ligplaats').forEach(ligplaats => {
-    const lx = parseFloat(ligplaats.getAttribute('x'));
-    const ly = parseFloat(ligplaats.getAttribute('y'));
-    const lw = parseFloat(ligplaats.getAttribute('width'));
-    const lh = parseFloat(ligplaats.getAttribute('height'));
-    if (bootX >= lx && bootX <= lx + lw && bootY >= ly && bootY <= ly + lh) {
-      binnenLigplaats = true;
-    }
-  });
+  if (distance < 5) {
+    // Kleine beweging ➔ behandelen als klik
+    editBoot(selectedBoot.id);
+  } else {
+    // Groot genoeg ➔ behandelen als sleep
+    saveBoot();
+  }
+}
+
 
   const wachtzone = document.getElementById('wachtzone');
   const wx = parseFloat(wachtzone.getAttribute('x'));
