@@ -179,6 +179,52 @@ function endDrag(e) {
     return;
   }
 
+  const bootRect = selectedBoot.group.querySelector('.boot');
+  const label = selectedBoot.group.querySelector('text');
+  const bootX = parseFloat(bootRect.getAttribute('x'));
+  const bootY = parseFloat(bootRect.getAttribute('y'));
+
+  let binnenLigplaats = false;
+  document.querySelectorAll('.ligplaats').forEach(ligplaats => {
+    const lx = parseFloat(ligplaats.getAttribute('x'));
+    const ly = parseFloat(ligplaats.getAttribute('y'));
+    const lw = parseFloat(ligplaats.getAttribute('width'));
+    const lh = parseFloat(ligplaats.getAttribute('height'));
+    if (bootX >= lx && bootX <= lx + lw && bootY >= ly && bootY <= ly + lh) {
+      binnenLigplaats = true;
+    }
+  });
+
+  const wachtzone = document.getElementById('wachtzone');
+  const wx = parseFloat(wachtzone.getAttribute('x'));
+  const wy = parseFloat(wachtzone.getAttribute('y'));
+  const ww = parseFloat(wachtzone.getAttribute('width'));
+  const wh = parseFloat(wachtzone.getAttribute('height'));
+
+  if (!binnenLigplaats && !(bootX >= wx && bootX <= wx + ww && bootY >= wy && bootY <= wy + wh)) {
+    // Boot buiten alles ➔ Zet hem in wachtzone
+
+    // Tel hoeveel boten al in wachtzone staan
+    let count = 0;
+    document.querySelectorAll('.boot').forEach(b => {
+      const bx = parseFloat(b.getAttribute('x'));
+      const by = parseFloat(b.getAttribute('y'));
+      if (bx >= wx && bx <= wx + ww && by >= wy && by <= wy + wh) {
+        count++;
+      }
+    });
+
+    // Zet nieuwe positie in wachtzone
+    const spacing = 30; // afstand tussen boten
+    const newX = wx + 10;
+    const newY = wy + 10 + count * spacing;
+
+    bootRect.setAttribute('x', newX);
+    bootRect.setAttribute('y', newY);
+    label.setAttribute('x', newX + 5);
+    label.setAttribute('y', newY + 15);
+  }
+
   saveBoot();
 }
 
