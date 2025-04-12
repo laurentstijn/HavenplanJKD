@@ -77,7 +77,16 @@ function saveBoot() {
   const eigenaar = document.getElementById('eigenaar').value;
   const status = document.getElementById('status').value;
 
-  const newBoot = {
+  // ✅ LET OP: bootRect, niet boatRect
+  bootRect.setAttribute('width', lengte * 5);
+  bootRect.setAttribute('height', breedte * 5);
+
+  if (bootLabel) {
+    bootLabel.textContent = naam;
+  }
+
+  // Opslaan naar Firebase
+  const updatedBoot = {
     naam,
     lengte,
     breedte,
@@ -87,13 +96,7 @@ function saveBoot() {
     y: parseFloat(bootRect.getAttribute('y'))
   };
 
-  boatRect.setAttribute('width', lengte * 5);
-  boatRect.setAttribute('height', breedte * 5);
-  if (bootLabel) {
-    bootLabel.textContent = naam;
-  }
-
-  database.ref('boten/' + id).set(newBoot); // <-- Opslaan in database
+  firebase.database().ref('boten/' + id).set(updatedBoot);
 }
 
 // Boot verwijderen uit Firebase
