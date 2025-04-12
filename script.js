@@ -12,12 +12,15 @@ fetch('boten.json')
 
   // Klik ergens op de haven om een nieuwe boot toe te voegen
   svg.addEventListener('click', (e) => {
+    // Voorkomen dat je bestaande boot aanklikt en daardoor 2x klikt
+    if (e.target.closest('.boot')) return;
+
     const svgRect = svg.getBoundingClientRect();
     const x = e.clientX - svgRect.left;
     const y = e.clientY - svgRect.top;
 
-    const svgX = (x / svgRect.width) * 800; // 800 = width van je viewBox
-    const svgY = (y / svgRect.height) * 600; // 600 = height van je viewBox
+    const svgX = (x / svgRect.width) * 800; // 800 = jouw viewBox breedte
+    const svgY = (y / svgRect.height) * 600; // 600 = jouw viewBox hoogte
 
     createNewBoot(svgX, svgY);
   });
@@ -44,7 +47,7 @@ function drawBoot(svg, boot, id) {
   boat.setAttribute('height', (boot.breedte || 4) * 5);
   boat.setAttribute('class', 'boot');
   boat.addEventListener('click', (event) => {
-    event.stopPropagation(); // voorkomt dat klik verder gaat naar achtergrond
+    event.stopPropagation(); // voorkomt dubbele klik
     selectBoot(boot, group, id);
   });
   group.appendChild(boat);
@@ -136,6 +139,6 @@ function createNewBoot(x, y) {
 
   svg.appendChild(group);
 
-  // Direct selecteren zodat formulier ingevuld kan worden
+  // Open direct het invulformulier
   selectBoot({}, group, id);
 }
