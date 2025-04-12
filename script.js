@@ -106,7 +106,7 @@ function endDrag(e) {
   const distance = Math.sqrt(dx * dx + dy * dy);
 
   if (distance < 5) {
-    // Bijna niet bewogen ➔ Klik = popup openen
+    // Klik zonder veel bewegen ➔ popup openen
     database.ref('boten/' + selectedBoot.id).once('value').then(snapshot => {
       const boot = snapshot.val();
       if (!boot) return;
@@ -121,12 +121,117 @@ function endDrag(e) {
       document.getElementById('popup').style.display = 'block';
     });
   } else {
-    // Wel bewogen ➔ Echt slepen
+    // Sleepbeweging ➔ opslaan nieuwe positie
     saveBoot();
   }
 }
 
-// Boot opslaan na slepen
+// Boot opslaan
 function saveBoot() {
   if (!selectedBoot) return;
-  const
+  const { id, group } = selectedBoot;
+  const bootRect = group.querySelector('.boot');
+  const bootLabel = group.querySelector('text');
+
+  const updatedBoot = {
+    naam: bootLabel.textContent || "Boot",
+    lengte: parseFloat(bootRect.getAttribute('width')) / 5,
+    breedte: parseFloat(bootRect.getAttribute('height')) / 5,
+    eigenaar: "",
+    status: "aanwezig",
+    x: parseFloat(bootRect.getAttribute('x')),
+    y: parseFloat(bootRect.getAttribute('y')),
+    ligplaats: ""
+  };
+
+  database.ref('boten/' + id).set(updatedBoot);
+}
+
+// Boot aanpassen vanuit menu
+function editBoot(id) {
+  database.ref('boten/' + id).once('value').then(snapshot => {
+    const boot = snapshot.val();
+    if (!boot) return;
+
+    geselecteerdeLigplaats = null;
+    editBootId = id;
+    document.getElementById('popupTitel').textContent = "Boot aanpassen";
+    document.getElementById('bootNaam').value = boot.naam;
+    document.getElementById('bootLengte').value = boot.lengte;
+    document.getElementById('bootBreedte').value = boot.breedte;
+    document.getElementById('bootEigenaar').value = boot.eigenaar || "";
+    document.getElementById('popup').style.display = 'block';
+  });
+}
+
+// Boot verwijderen
+function deleteBoot(id) {
+  if (confirm("Weet je zeker dat je deze boot wilt verwijderen?")) {
+    database.ref('boten/' + id).remove(() => location.reload());
+  }
+}
+
+// Popup bevestigen
+function bevestigBoot() {
+  const naam = document.getElementById('bootNaam').value.trim();
+  const lengte = parseFloat(document.getElementById('bootLengte').value) || 12;
+  const breedte = parseFloat(document.getElementById('bootBreedte').value) || 4;
+  const eigenaar = document.getElementById('bootEigenaar').value.trim();
+
+  if (!naam) {
+    alert("Vul alle velden correct in.");
+    return;
+  }
+
+  if (editBootId) {
+    // Bestaande boot aanpassen
+    database.ref('boten/' + editBootId).once('value').then(snapshot => {
+      const boot = snapshot.val();
+      if (!boot) return;
+
+      boot.naam = naam;
+      boot.lengte = lengte;
+      boot.breedte = breedte;
+      boot.eigenaar = eigenaar;
+
+      database.ref('boten/' + editBootId).set(boot, () => location.reload());
+    });
+  } else {
+    // Nieuwe boot toevoegen
+    const id = database.ref().child('boten').push().key;
+    const newBoot = {
+      naam: naam,
+      lengte: lengte,
+      breedte: breedte,
+      eigenaar: eigenaar,
+      status: "aanwezig",
+      x: parseFloat(geselecteerdeLigplaats.getAttribute('x')) + 10,
+      y: parseFloat(geselecteerdeLigplaats.getAttribute('y')) + 5,
+      ligplaats: geselecteerdeLigplaats.id
+    };
+    database.ref('boten/' + id).set(newBoot, () => location.reload());
+  }
+}
+
+// Popup annuleren
+function annuleerBoot() {
+  document.getElementById('popup').style.display = 'none';
+}
+
+// Ligplaatsen klikbaar maken
+document.querySelectorAll('.ligplaats').forEach(ligplaats => {
+  ligplaats.addEventListener('click', (e) => {
+    e.stopPropagation();
+    geselecteerdeLigplaats = ligplaats;
+    editBootId = null;
+    document.getElementById('popupTitel').textContent = "Nieuwe boot toevoegen";
+    document.getElementById('bootNaam').value = "";
+    document.getElementById('bootLengte').value = 12;
+    document.getElementById('bootBreedte').value = 4;
+    document.getElementById('bootEigenaar').value = "";
+    document.getElementById('popup').style.display = 'block';
+  });
+});
+
+// Start
+loadBoten();
