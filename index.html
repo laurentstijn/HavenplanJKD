@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+  <meta charset="UTF-8">
+  <title>Interactief Havenplan</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<div class="container">
+  <svg id="haven" viewBox="0 0 800 600">
+    <!-- Steigers -->
+    <rect class="steiger" x="50" y="100" width="700" height="30"/>
+    <rect class="steiger" x="200" y="130" width="30" height="300"/>
+    <rect class="steiger" x="400" y="130" width="30" height="300"/>
+    <rect class="steiger" x="600" y="130" width="30" height="300"/>
+  </svg>
+
+  <div class="sidebar">
+    <h2>Ligplaats Details</h2>
+    <form id="bootForm">
+      <label>Naam boot:</label><input type="text" id="naam" /><br/>
+      <label>Lengte (m):</label><input type="number" id="lengte" /><br/>
+      <label>Breedte (m):</label><input type="number" id="breedte" /><br/>
+      <label>Eigenaar:</label><input type="text" id="eigenaar" /><br/>
+      <label>Status:</label>
+      <select id="status">
+        <option value="aanwezig">Aanwezig</option>
+        <option value="afwezig">Afwezig</option>
+        <option value="gereserveerd">Gereserveerd</option>
+      </select><br/>
+      <button type="button" onclick="saveBoot()">Opslaan</button>
+      <button type="button" onclick="deleteBoot()">Verwijderen</button>
+    </form>
+    <div id="vrijeRuimte"></div>
+  </div>
+</div>
+
+<script src="script.js"></script>
+
+</body>
+</html>
