@@ -2,5 +2,6 @@
   "boten": [
     { "naam": "Boot 1", "lengte": 12, "breedte": 4, "eigenaar": "Jan", "status": "aanwezig", "x": 250, "y": 150 },
     { "naam": "Boot 2", "lengte": 11, "breedte": 3.8, "eigenaar": "Piet", "status": "afwezig", "x": 250, "y": 200 }
+    { "naam": "Boot 3", "lengte": 11, "breedte": 3.8, "eigenaar": "Piet", "status": "afwezig", "x": 250, "y": 250 }
   ]
 }
