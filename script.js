@@ -67,7 +67,7 @@ function tekenBasisHaven() {
       document.getElementById('bootBreedte').value = 4;
       document.getElementById('bootEigenaar').value = "";
       document.getElementById('popupLigplaats').value = ligplaats.id; // Ligplaats ID instellen
-      document.getElementById('popup').style.display = 'block';
+      document.getElementById('popup').style.display = 'block'; // Popup zichtbaar maken
     });
   });
 }
