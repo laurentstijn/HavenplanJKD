@@ -1,8 +1,8 @@
-let startX, startY;
-let editBootId = null;  // weten of we nieuwe boot maken of bestaande bewerken
 let geselecteerdeLigplaats = null;
 let selectedBoot = null;
+let editBootId = null;
 let dragging = false;
+let startX, startY;
 const database = firebase.database();
 
 // Boten laden
@@ -76,10 +76,6 @@ function startDrag(e) {
   document.addEventListener('mousemove', drag);
   document.addEventListener('mouseup', endDrag);
 }
-  dragging = true;
-  document.addEventListener('mousemove', drag);
-  document.addEventListener('mouseup', endDrag);
-}
 
 // Tijdens slepen
 function drag(e) {
@@ -105,13 +101,12 @@ function endDrag(e) {
 
   if (!selectedBoot) return;
 
-  // Bereken afstand van muisbeweging
   const dx = e.clientX - startX;
   const dy = e.clientY - startY;
   const distance = Math.sqrt(dx * dx + dy * dy);
 
   if (distance < 5) {
-    // ➔ Bijna niet bewogen: gewoon klik (open popup)
+    // Bijna niet bewogen ➔ Klik = popup openen
     database.ref('boten/' + selectedBoot.id).once('value').then(snapshot => {
       const boot = snapshot.val();
       if (!boot) return;
@@ -126,144 +121,3 @@ function endDrag(e) {
       document.getElementById('popup').style.display = 'block';
     });
   } else {
-    // ➔ Wel bewogen: echte sleepactie
-    saveBoot();
-  }
-}
-
-// Boot opslaan
-function saveBoot() {
-  if (!selectedBoot) return;
-  const { id, group } = selectedBoot;
-  const bootRect = group.querySelector('.boot');
-  const bootLabel = group.querySelector('text');
-  const updatedBoot = {
-    naam: bootLabel.textContent || "Boot",
-    lengte: parseFloat(bootRect.getAttribute('width')) / 5,
-    breedte: parseFloat(bootRect.getAttribute('height')) / 5,
-    eigenaar: "",
-    status: "aanwezig",
-    x: parseFloat(bootRect.getAttribute('x')),
-    y: parseFloat(bootRect.getAttribute('y')),
-    ligplaats: ""
-  };
-  database.ref('boten/' + id).set(updatedBoot);
-}
-
-// Boot aanpassen
-function editBoot(id) {
-  database.ref('boten/' + id).once('value').then(snapshot => {
-    const boot = snapshot.val();
-    if (!boot) return;
-
-    geselecteerdeLigplaats = null; // Geen nieuwe ligplaats
-    editBootId = id; // Bestaande boot aanpassen
-    document.getElementById('popupTitel').textContent = "Boot aanpassen";
-    document.getElementById('bootNaam').value = boot.naam;
-    document.getElementById('bootLengte').value = boot.lengte;
-    document.getElementById('bootBreedte').value = boot.breedte;
-    document.getElementById('bootEigenaar').value = boot.eigenaar;
-    document.getElementById('popup').style.display = 'block';
-  });
-}
-
-
-// Boot verwijderen
-function deleteBoot(id) {
-  if (confirm("Weet je zeker dat je deze boot wilt verwijderen?")) {
-    database.ref('boten/' + id).remove(() => location.reload());
-  }
-}
-
-// Popup opslaan
-function bevestigBoot() {
-  const naam = document.getElementById('bootNaam').value.trim();
-  const lengte = parseFloat(document.getElementById('bootLengte').value) || 12;
-  const breedte = parseFloat(document.getElementById('bootBreedte').value) || 4;
-  const eigenaar = document.getElementById('bootEigenaar').value.trim();
-  
-  if (!naam || !geselecteerdeLigplaats) {
-    alert("Vul alle velden correct in.");
-    return;
-  }
-
-  const id = database.ref().child('boten').push().key;
-
-  const newBoot = {
-    naam: naam,
-    lengte: lengte,
-    breedte: breedte,
-    eigenaar: eigenaar,
-    status: "aanwezig",
-    x: parseFloat(geselecteerdeLigplaats.getAttribute('x')) + 10,
-    y: parseFloat(geselecteerdeLigplaats.getAttribute('y')) + 5,
-    ligplaats: geselecteerdeLigplaats.id
-  };
-
-  database.ref('boten/' + id).set(newBoot, () => location.reload());
-}
-
-// Popup annuleren
-function annuleerBoot() {
-  document.getElementById('popup').style.display = 'none';
-}
-
-// Ligplaatsen klikbaar maken
-document.querySelectorAll('.ligplaats').forEach(ligplaats => {
-  ligplaats.addEventListener('click', (e) => {
-    e.stopPropagation();
-    geselecteerdeLigplaats = ligplaats;
-    editBootId = null; // NIEUWE boot
-    document.getElementById('popupTitel').textContent = "Nieuwe boot toevoegen";
-    document.getElementById('bootNaam').value = "";
-    document.getElementById('bootLengte').value = 12;
-    document.getElementById('bootBreedte').value = 4;
-    document.getElementById('bootEigenaar').value = "";
-    document.getElementById('popup').style.display = 'block';
-  });
-});
-
-function bevestigBoot() {
-  const naam = document.getElementById('bootNaam').value.trim();
-  const lengte = parseFloat(document.getElementById('bootLengte').value) || 12;
-  const breedte = parseFloat(document.getElementById('bootBreedte').value) || 4;
-  const eigenaar = document.getElementById('bootEigenaar').value.trim();
-
-  if (!naam) {
-    alert("Vul alle velden correct in.");
-    return;
-  }
-
-  if (editBootId) {
-    // Bestaande boot bijwerken
-    database.ref('boten/' + editBootId).once('value').then(snapshot => {
-      const boot = snapshot.val();
-      if (!boot) return;
-      boot.naam = naam;
-      boot.lengte = lengte;
-      boot.breedte = breedte;
-      boot.eigenaar = eigenaar;
-
-      database.ref('boten/' + editBootId).set(boot, () => location.reload());
-    });
-  } else {
-    // Nieuwe boot maken
-    const id = database.ref().child('boten').push().key;
-    const newBoot = {
-      naam: naam,
-      lengte: lengte,
-      breedte: breedte,
-      eigenaar: eigenaar,
-      status: "aanwezig",
-      x: parseFloat(geselecteerdeLigplaats.getAttribute('x')) + 10,
-      y: parseFloat(geselecteerdeLigplaats.getAttribute('y')) + 5,
-      ligplaats: geselecteerdeLigplaats.id
-    };
-    database.ref('boten/' + id).set(newBoot, () => location.reload());
-  }
-}
-
-
-
-// Start
-loadBoten();
