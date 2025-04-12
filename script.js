@@ -1,3 +1,4 @@
+let geselecteerdeLigplaats = null;
 let selectedBoot = null;
 let dragging = false;
 let wachtzoneBootTeller = 0;
