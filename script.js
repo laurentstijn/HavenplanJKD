@@ -1,13 +1,15 @@
-// Laden van bestaande boten uit JSON
-fetch('boten.json')
-  .then(response => response.json())
-  .then(data => {
-    data.boten.forEach(boot => {
-      voegBootToeAanSVG(boot);
-      voegBootToeAanLijst(boot);
-    });
+// Bestaande boten laden uit Firebase
+firebase.database().ref('boten').once('value')
+  .then(snapshot => {
+    const data = snapshot.val();
+    if (data) {
+      Object.keys(data).forEach(key => {
+        voegBootToeAanSVG(data[key]);
+        voegBootToeAanLijst(data[key]);
+      });
+    }
   })
-  .catch(error => console.error('Fout bij laden boten.json:', error));
+  .catch(error => console.error('Fout bij laden Firebase data:', error));
 
 // Functie: Boot toevoegen aan SVG
 function voegBootToeAanSVG(boot) {
@@ -76,7 +78,7 @@ function stopDrag() {
 function toonPopup(bootNaam) {
   document.getElementById('popup').style.display = 'block';
   document.getElementById('popupTitel').textContent = `Bewerk boot: ${bootNaam}`;
-  // Hier kan je laden van boot details toevoegen indien gewenst
+  // Hier kan je later bewerkingsfunctionaliteit toevoegen
 }
 
 // Popup annuleren
