@@ -44,10 +44,10 @@ function drawBoot(svg, boot, id) {
   svg.appendChild(group);
 }
 
-// 🚀 Alleen klik op ligplaats om nieuwe boot te maken
+// 🚀 Alleen klik op ligplaats ➔ nieuwe boot maken
 document.querySelectorAll('.ligplaats').forEach(ligplaats => {
-  ligplaats.addEventListener('click', (e) => {
-    e.stopPropagation(); // Stop klik doorsturen
+  ligplaats.addEventListener('click', async (e) => {
+    e.stopPropagation();
 
     const svg = document.getElementById('haven');
     const ligplaatsId = ligplaats.getAttribute('id');
@@ -59,12 +59,24 @@ document.querySelectorAll('.ligplaats').forEach(ligplaats => {
       return;
     }
 
+    // 🎯 Pop-up vragen naar boot info
+    const naam = prompt("Naam van de boot:", "Nieuwe boot") || "Nieuwe boot";
+    const lengteInput = prompt("Lengte van de boot (m):", "12");
+    const breedteInput = prompt("Breedte van de boot (m):", "4");
+
+    // 🚨 Validate input
+    let lengte = parseFloat(lengteInput);
+    let breedte = parseFloat(breedteInput);
+
+    if (isNaN(lengte) || lengte <= 0) lengte = 12;
+    if (isNaN(breedte) || breedte <= 0) breedte = 4;
+
     const id = database.ref().child('boten').push().key;
 
     const newBoot = {
-      naam: "Nieuwe boot",
-      lengte: 12,
-      breedte: 4,
+      naam: naam,
+      lengte: lengte,
+      breedte: breedte,
       eigenaar: "",
       status: "aanwezig",
       x: parseFloat(ligplaats.getAttribute('x')) + 10,
@@ -78,7 +90,7 @@ document.querySelectorAll('.ligplaats').forEach(ligplaats => {
   });
 });
 
-// 🚚 Sleepstart: als je een boot aanklikt
+// 🚚 Start slepen
 function startDrag(e) {
   selectedBoot = {
     group: e.target.parentNode,
@@ -93,7 +105,7 @@ function startDrag(e) {
   document.addEventListener('mouseup', endDrag);
 }
 
-// 🚚 Sleepbeweging
+// 🚚 Sleep beweging
 function drag(e) {
   if (!dragging) return;
 
@@ -112,4 +124,53 @@ function drag(e) {
   label.setAttribute('y', cursorpt.y + 5);
 }
 
-// 🚚
+// 🚚 Stop slepen
+function endDrag(e) {
+  dragging = false;
+  saveBoot();
+  document.removeEventListener('mousemove', drag);
+  document.removeEventListener('mouseup', endDrag);
+}
+
+// 💾 Boot opslaan in Firebase
+function saveBoot() {
+  if (!selectedBoot) return;
+
+  const { id, group } = selectedBoot;
+  const bootRect = group.querySelector('.boot');
+  const bootLabel = group.querySelector('text');
+
+  if (!bootRect) return;
+
+  let lengte = parseFloat(bootRect.getAttribute('width')) / 5;
+  let breedte = parseFloat(bootRect.getAttribute('height')) / 5;
+
+  if (isNaN(lengte) || lengte <= 0) lengte = 12;
+  if (isNaN(breedte) || breedte <= 0) breedte = 4;
+
+  const updatedBoot = {
+    naam: bootLabel.textContent || "Boot",
+    lengte: lengte,
+    breedte: breedte,
+    eigenaar: "",
+    status: "aanwezig",
+    x: parseFloat(bootRect.getAttribute('x')),
+    y: parseFloat(bootRect.getAttribute('y')),
+    ligplaats: group.getAttribute('data-ligplaats')
+  };
+
+  database.ref('boten/' + id).set(updatedBoot);
+}
+
+// 🛥️ Boot verwijderen
+function deleteBoot() {
+  if (!selectedBoot) return;
+  const { id, group } = selectedBoot;
+
+  database.ref('boten/' + id).remove();
+  group.parentNode.removeChild(group);
+  selectedBoot = null;
+}
+
+// 🚀 Start: laad alles
+loadBoten();
