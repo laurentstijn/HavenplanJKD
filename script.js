@@ -1,3 +1,4 @@
+let editBootId = null;  // weten of we nieuwe boot maken of bestaande bewerken
 let geselecteerdeLigplaats = null;
 let selectedBoot = null;
 let dragging = false;
@@ -66,10 +67,28 @@ function startDrag(e) {
     group: e.target.parentNode,
     id: e.target.parentNode.getAttribute('data-id')
   };
+
+  if (!dragging) { // klik zonder slepen = popup openen
+    database.ref('boten/' + selectedBoot.id).once('value').then(snapshot => {
+      const boot = snapshot.val();
+      if (!boot) return;
+
+      geselecteerdeLigplaats = null; // omdat we een bestaande bewerken
+      editBootId = selectedBoot.id;  // bestaande boot
+      document.getElementById('popupTitel').textContent = "Boot aanpassen";
+      document.getElementById('bootNaam').value = boot.naam;
+      document.getElementById('bootLengte').value = boot.lengte;
+      document.getElementById('bootBreedte').value = boot.breedte;
+      document.getElementById('bootEigenaar').value = boot.eigenaar;
+      document.getElementById('popup').style.display = 'block';
+    });
+  }
+
   dragging = true;
   document.addEventListener('mousemove', drag);
   document.addEventListener('mouseup', endDrag);
 }
+
 
 // Tijdens slepen
 function drag(e) {
@@ -225,9 +244,57 @@ document.querySelectorAll('.ligplaats').forEach(ligplaats => {
   ligplaats.addEventListener('click', (e) => {
     e.stopPropagation();
     geselecteerdeLigplaats = ligplaats;
+    editBootId = null; // NIEUWE boot
+    document.getElementById('popupTitel').textContent = "Nieuwe boot toevoegen";
+    document.getElementById('bootNaam').value = "";
+    document.getElementById('bootLengte').value = 12;
+    document.getElementById('bootBreedte').value = 4;
+    document.getElementById('bootEigenaar').value = "";
     document.getElementById('popup').style.display = 'block';
   });
 });
+
+function bevestigBoot() {
+  const naam = document.getElementById('bootNaam').value.trim();
+  const lengte = parseFloat(document.getElementById('bootLengte').value) || 12;
+  const breedte = parseFloat(document.getElementById('bootBreedte').value) || 4;
+  const eigenaar = document.getElementById('bootEigenaar').value.trim();
+
+  if (!naam) {
+    alert("Vul alle velden correct in.");
+    return;
+  }
+
+  if (editBootId) {
+    // Bestaande boot bijwerken
+    database.ref('boten/' + editBootId).once('value').then(snapshot => {
+      const boot = snapshot.val();
+      if (!boot) return;
+      boot.naam = naam;
+      boot.lengte = lengte;
+      boot.breedte = breedte;
+      boot.eigenaar = eigenaar;
+
+      database.ref('boten/' + editBootId).set(boot, () => location.reload());
+    });
+  } else {
+    // Nieuwe boot maken
+    const id = database.ref().child('boten').push().key;
+    const newBoot = {
+      naam: naam,
+      lengte: lengte,
+      breedte: breedte,
+      eigenaar: eigenaar,
+      status: "aanwezig",
+      x: parseFloat(geselecteerdeLigplaats.getAttribute('x')) + 10,
+      y: parseFloat(geselecteerdeLigplaats.getAttribute('y')) + 5,
+      ligplaats: geselecteerdeLigplaats.id
+    };
+    database.ref('boten/' + id).set(newBoot, () => location.reload());
+  }
+}
+
+
 
 // Start
 loadBoten();
