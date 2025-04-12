@@ -3,7 +3,7 @@ let dragging = false;
 let offsetX, offsetY;
 const database = firebase.database();
 
-// Laden boten uit Firebase
+// 🚀 Laad boten vanuit Firebase
 function loadBoten() {
   const svg = document.getElementById('haven');
 
@@ -18,11 +18,12 @@ function loadBoten() {
   });
 }
 
-// Boot tekenen
+// 🎨 Teken een boot
 function drawBoot(svg, boot, id) {
   const group = document.createElementNS('http://www.w3.org/2000/svg', 'g');
   group.setAttribute('class', 'bootgroep');
   group.setAttribute('data-id', id);
+  group.setAttribute('data-ligplaats', boot.ligplaats);
 
   const boat = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
   boat.setAttribute('x', boot.x);
@@ -43,59 +44,15 @@ function drawBoot(svg, boot, id) {
   svg.appendChild(group);
 }
 
-// Boot opslaan
-function saveBoot() {
-  if (!selectedBoot) return;
-
-  const { id, group } = selectedBoot;
-  const bootRect = group.querySelector('.boot');
-  const bootLabel = group.querySelector('text');
-
-  if (!bootRect) return;
-
-  const naam = document.getElementById('naam').value;
-  const lengte = parseFloat(document.getElementById('lengte').value);
-  const breedte = parseFloat(document.getElementById('breedte').value);
-  const eigenaar = document.getElementById('eigenaar').value;
-  const status = document.getElementById('status').value;
-
-  bootRect.setAttribute('width', lengte * 5);
-  bootRect.setAttribute('height', breedte * 5);
-
-  if (bootLabel) {
-    bootLabel.textContent = naam;
-  }
-
-  const updatedBoot = {
-    naam,
-    lengte,
-    breedte,
-    eigenaar,
-    status,
-    x: parseFloat(bootRect.getAttribute('x')),
-    y: parseFloat(bootRect.getAttribute('y'))
-  };
-
-  firebase.database().ref('boten/' + id).set(updatedBoot);
-}
-
-// Boot verwijderen
-function deleteBoot() {
-  if (!selectedBoot) return;
-  const { id, group } = selectedBoot;
-
-  firebase.database().ref('boten/' + id).remove();
-  group.parentNode.removeChild(group);
-  selectedBoot = null;
-}
-
-// Klik op ligplaats ➔ boot toevoegen
+// 🚀 Alleen klik op ligplaats om nieuwe boot te maken
 document.querySelectorAll('.ligplaats').forEach(ligplaats => {
   ligplaats.addEventListener('click', (e) => {
+    e.stopPropagation(); // Stop klik doorsturen
+
     const svg = document.getElementById('haven');
     const ligplaatsId = ligplaats.getAttribute('id');
 
-    // Controleer of er al een boot op deze ligplaats is
+    // Check of ligplaats al bezet is
     const existingBoot = document.querySelector(`[data-ligplaats="${ligplaatsId}"]`);
     if (existingBoot) {
       alert('Deze ligplaats is al bezet!');
@@ -117,32 +74,11 @@ document.querySelectorAll('.ligplaats').forEach(ligplaats => {
 
     database.ref('boten/' + id).set(newBoot);
 
-    const group = document.createElementNS('http://www.w3.org/2000/svg', 'g');
-    group.setAttribute('class', 'bootgroep');
-    group.setAttribute('data-id', id);
-    group.setAttribute('data-ligplaats', ligplaatsId);
-
-    const boat = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
-    boat.setAttribute('x', newBoot.x);
-    boat.setAttribute('y', newBoot.y);
-    boat.setAttribute('width', 60);
-    boat.setAttribute('height', 20);
-    boat.setAttribute('class', 'boot');
-    boat.addEventListener('mousedown', startDrag);
-    group.appendChild(boat);
-
-    const label = document.createElementNS('http://www.w3.org/2000/svg', 'text');
-    label.setAttribute('x', newBoot.x + 5);
-    label.setAttribute('y', newBoot.y + 20);
-    label.setAttribute('class', 'label');
-    label.textContent = "Nieuwe boot";
-    group.appendChild(label);
-
-    svg.appendChild(group);
+    drawBoot(svg, newBoot, id);
   });
 });
 
-// Sleep boot
+// 🚚 Sleepstart: als je een boot aanklikt
 function startDrag(e) {
   selectedBoot = {
     group: e.target.parentNode,
@@ -157,6 +93,7 @@ function startDrag(e) {
   document.addEventListener('mouseup', endDrag);
 }
 
+// 🚚 Sleepbeweging
 function drag(e) {
   if (!dragging) return;
 
@@ -175,12 +112,4 @@ function drag(e) {
   label.setAttribute('y', cursorpt.y + 5);
 }
 
-function endDrag(e) {
-  dragging = false;
-  saveBoot();
-  document.removeEventListener('mousemove', drag);
-  document.removeEventListener('mouseup', endDrag);
-}
-
-// 🚀 Start
-loadBoten();
+// 🚚
