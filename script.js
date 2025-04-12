@@ -25,18 +25,25 @@ function drawBoot(svg, boot, id) {
   group.setAttribute('class', 'bootgroep');
   group.setAttribute('data-id', id);
 
-  const rect = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
-  rect.setAttribute('x', boot.x);
-  rect.setAttribute('y', boot.y);
-  rect.setAttribute('width', (boot.lengte || 12) * 5);
-  rect.setAttribute('height', (boot.breedte || 4) * 5);
-  rect.setAttribute('class', 'boot');
-  rect.addEventListener('mousedown', startDrag);
-  group.appendChild(rect);
+  // Boot romp (mooie ovale vorm)
+  const ellipse = document.createElementNS('http://www.w3.org/2000/svg', 'ellipse');
+  const centerX = boot.x + 30; // midden van de boot
+  const centerY = boot.y + 15;
+  ellipse.setAttribute('cx', centerX);
+  ellipse.setAttribute('cy', centerY);
+  ellipse.setAttribute('rx', (boot.lengte || 12) * 2);  // breedte
+  ellipse.setAttribute('ry', (boot.breedte || 4) * 2);  // hoogte
+  ellipse.setAttribute('fill', '#d0d0d0');              // lichtgrijze kleur
+  ellipse.setAttribute('stroke', '#555');               // donkere rand
+  ellipse.setAttribute('stroke-width', 2);
+  ellipse.classList.add('boot');
+  ellipse.addEventListener('mousedown', startDrag);
+  group.appendChild(ellipse);
 
+  // Boot naam
   const label = document.createElementNS('http://www.w3.org/2000/svg', 'text');
-  label.setAttribute('x', boot.x + 5);
-  label.setAttribute('y', boot.y + 20);
+  label.setAttribute('x', centerX - 20);
+  label.setAttribute('y', centerY + 25);
   label.setAttribute('class', 'label');
   label.textContent = boot.naam || "Boot";
   group.appendChild(label);
