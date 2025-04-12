@@ -41,21 +41,29 @@ function makeDraggable(element) {
 
   element.addEventListener('mousedown', (e) => {
     selected = element;
-    offsetX = e.offsetX - parseFloat(element.getAttribute('x'));
-    offsetY = e.offsetY - parseFloat(element.getAttribute('y'));
+
+    const svg = document.getElementById('haven');
+    const pt = svg.createSVGPoint();
+    pt.x = e.clientX;
+    pt.y = e.clientY;
+    const cursorpt = pt.matrixTransform(svg.getScreenCTM().inverse());
+
+    offsetX = cursorpt.x - parseFloat(element.getAttribute('x'));
+    offsetY = cursorpt.y - parseFloat(element.getAttribute('y'));
+
     selected.style.cursor = 'grabbing';
   });
 
   window.addEventListener('mousemove', (e) => {
     if (selected) {
-      let svg = document.getElementById('haven');
-      let pt = svg.createSVGPoint();
+      const svg = document.getElementById('haven');
+      const pt = svg.createSVGPoint();
       pt.x = e.clientX;
       pt.y = e.clientY;
-      let svgP = pt.matrixTransform(svg.getScreenCTM().inverse());
+      const cursorpt = pt.matrixTransform(svg.getScreenCTM().inverse());
 
-      selected.setAttribute('x', svgP.x - offsetX);
-      selected.setAttribute('y', svgP.y - offsetY);
+      selected.setAttribute('x', cursorpt.x - offsetX);
+      selected.setAttribute('y', cursorpt.y - offsetY);
     }
   });
 
@@ -66,3 +74,4 @@ function makeDraggable(element) {
     }
   });
 }
+
