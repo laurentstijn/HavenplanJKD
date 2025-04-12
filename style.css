@@ -21,7 +21,6 @@ svg {
   width: 100%;
   height: 100%;
 }
-
 .boot {
   fill: #d0d0d0;
   stroke: #555;
@@ -65,18 +64,15 @@ svg {
 .popup-buttons button {
   width: 48%;
 }
-
 .steiger {
   fill: #c2b8a3; /* Lichtbruin steiger kleur */
 }
-
 .ligplaats {
   fill: rgba(163, 194, 194, 0.4);
   stroke: #333;
   stroke-width: 1;
   cursor: pointer;
 }
-
 .wachtzone {
   fill: #d0e8ff;
   stroke: #00aaff;
