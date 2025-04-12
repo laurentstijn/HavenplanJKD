@@ -10,10 +10,9 @@ fetch('boten.json')
     drawBoot(svg, boot, index);
   });
 
-  // Klik ergens op de haven om een nieuwe boot toe te voegen
+  // Klik ergens in de haven om een nieuwe boot toe te voegen
   svg.addEventListener('click', (e) => {
-    // Voorkomen dat je bestaande boot aanklikt en daardoor 2x klikt
-    if (e.target.closest('.boot')) return;
+    if (e.target.closest('.boot') || e.target.closest('.ligplaats')) return; // Niet klikken op bestaande boot of ligplaats
 
     const svgRect = svg.getBoundingClientRect();
     const x = e.clientX - svgRect.left;
@@ -38,6 +37,10 @@ function drawBoot(svg, boot, id) {
   rect.setAttribute('width', 120);
   rect.setAttribute('height', 30);
   rect.setAttribute('fill', '#88c0d0');
+  rect.addEventListener('click', (event) => {
+    event.stopPropagation();
+    selectBoot(boot, group, id);
+  });
   group.appendChild(rect);
 
   const boat = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
@@ -47,7 +50,7 @@ function drawBoot(svg, boot, id) {
   boat.setAttribute('height', (boot.breedte || 4) * 5);
   boat.setAttribute('class', 'boot');
   boat.addEventListener('click', (event) => {
-    event.stopPropagation(); // voorkomt dubbele klik
+    event.stopPropagation();
     selectBoot(boot, group, id);
   });
   group.appendChild(boat);
@@ -116,6 +119,10 @@ function createNewBoot(x, y) {
   rect.setAttribute('width', 120);
   rect.setAttribute('height', 30);
   rect.setAttribute('fill', '#88c0d0');
+  rect.addEventListener('click', (event) => {
+    event.stopPropagation();
+    selectBoot({}, group, id);
+  });
   group.appendChild(rect);
 
   const boat = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
