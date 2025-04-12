@@ -284,5 +284,23 @@ document.querySelectorAll('.ligplaats').forEach(ligplaats => {
   });
 });
 
+// Ligplaats naam labels tekenen (linkerbovenhoek)
+function tekenLigplaatsNamen() {
+  const svg = document.getElementById('haven');
+  document.querySelectorAll('.ligplaats').forEach(ligplaats => {
+    const lx = parseFloat(ligplaats.getAttribute('x'));
+    const ly = parseFloat(ligplaats.getAttribute('y'));
+
+    const label = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+    label.setAttribute('x', lx + 5);           // Iets rechts van de linkerrand
+    label.setAttribute('y', ly + 12);           // Iets onder de bovenrand
+    label.setAttribute('text-anchor', 'start'); // Tekst links uitlijnen
+    label.setAttribute('class', 'label');
+    label.textContent = ligplaats.id;           // Bijvoorbeeld: ligplaats1
+
+    svg.appendChild(label);
+  });
+}
+
 // Start
 loadBoten();
