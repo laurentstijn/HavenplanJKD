@@ -12,46 +12,33 @@ fetch('boten.json')
 
   // Klik ergens in de haven om een nieuwe boot toe te voegen
   svg.addEventListener('click', (e) => {
-    // Controle: klik je op bestaande boot, ligplaats of steiger? => geen nieuwe boot maken
     if (
-      e.target.tagName === 'rect' &&
-      (e.target.classList.contains('steiger') || e.target.classList.contains('boot') || e.target.parentNode.classList.contains('ligplaats'))
+      e.target.tagName === 'rect' && 
+      (e.target.classList.contains('boot') || e.target.parentNode.classList.contains('ligplaats'))
     ) {
-      return; // Klikte op bestaande objecten -> NIKS nieuwe boot maken
+      return; // Klikte op bestaande boot -> geen nieuwe boot maken
     }
 
     const svgRect = svg.getBoundingClientRect();
     const x = e.clientX - svgRect.left;
     const y = e.clientY - svgRect.top;
 
-    const svgX = (x / svgRect.width) * 800; // 800 = breedte van jouw SVG viewBox
-    const svgY = (y / svgRect.height) * 600; // 600 = hoogte van jouw SVG viewBox
+    const svgX = (x / svgRect.width) * 800;
+    const svgY = (y / svgRect.height) * 600;
 
     createNewBoot(svgX, svgY);
   });
 });
 
-// Functie om een boot en ligplaats te tekenen
+// Functie om een boot te tekenen (ZONDER blauwe kader)
 function drawBoot(svg, boot, id) {
   const group = document.createElementNS('http://www.w3.org/2000/svg', 'g');
   group.setAttribute('class', 'ligplaats');
   group.setAttribute('data-id', id);
 
-  const rect = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
-  rect.setAttribute('x', boot.x);
-  rect.setAttribute('y', boot.y);
-  rect.setAttribute('width', 120);
-  rect.setAttribute('height', 30);
-  rect.setAttribute('fill', '#88c0d0');
-  rect.addEventListener('click', (event) => {
-    event.stopPropagation();
-    selectBoot(boot, group, id);
-  });
-  group.appendChild(rect);
-
   const boat = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
-  boat.setAttribute('x', boot.x + 10);
-  boat.setAttribute('y', boot.y + 5);
+  boat.setAttribute('x', boot.x);
+  boat.setAttribute('y', boot.y);
   boat.setAttribute('width', (boot.lengte || 12) * 5);
   boat.setAttribute('height', (boot.breedte || 4) * 5);
   boat.setAttribute('class', 'boot');
@@ -62,10 +49,14 @@ function drawBoot(svg, boot, id) {
   group.appendChild(boat);
 
   const label = document.createElementNS('http://www.w3.org/2000/svg', 'text');
-  label.setAttribute('x', boot.x + 15);
+  label.setAttribute('x', boot.x + 5);
   label.setAttribute('y', boot.y + 20);
   label.setAttribute('class', 'label');
   label.textContent = boot.naam || 'Boot';
+  label.addEventListener('click', (event) => {
+    event.stopPropagation();
+    selectBoot(boot, group, id);
+  });
   group.appendChild(label);
 
   svg.appendChild(group);
@@ -85,7 +76,7 @@ function selectBoot(boot, group, id) {
 function saveBoot() {
   if (!selectedBoot) return;
   const { group } = selectedBoot;
-  const bootRect = group.querySelector('.boot');
+  const boatRect = group.querySelector('.boot');
   const bootLabel = group.querySelector('text');
 
   const naam = document.getElementById('naam').value;
@@ -94,8 +85,8 @@ function saveBoot() {
   const eigenaar = document.getElementById('eigenaar').value;
   const status = document.getElementById('status').value;
 
-  bootRect.setAttribute('width', lengte * 5);
-  bootRect.setAttribute('height', breedte * 5);
+  boatRect.setAttribute('width', lengte * 5);
+  boatRect.setAttribute('height', breedte * 5);
 
   if (bootLabel) {
     bootLabel.textContent = naam;
@@ -110,7 +101,7 @@ function deleteBoot() {
   selectedBoot = null;
 }
 
-// Functie om nieuwe boot te maken bij klik
+// Functie om nieuwe boot te maken (ZONDER blauwe kader)
 function createNewBoot(x, y) {
   const svg = document.getElementById('haven');
   const id = Date.now(); // Uniek ID gebaseerd op tijd
@@ -119,20 +110,8 @@ function createNewBoot(x, y) {
   group.setAttribute('class', 'ligplaats');
   group.setAttribute('data-id', id);
 
-  const rect = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
-  rect.setAttribute('x', x - 60);
-  rect.setAttribute('y', y - 15);
-  rect.setAttribute('width', 120);
-  rect.setAttribute('height', 30);
-  rect.setAttribute('fill', '#88c0d0');
-  rect.addEventListener('click', (event) => {
-    event.stopPropagation();
-    selectBoot({}, group, id);
-  });
-  group.appendChild(rect);
-
   const boat = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
-  boat.setAttribute('x', x - 50);
+  boat.setAttribute('x', x - 30);
   boat.setAttribute('y', y - 10);
   boat.setAttribute('width', 60);
   boat.setAttribute('height', 20);
@@ -144,10 +123,14 @@ function createNewBoot(x, y) {
   group.appendChild(boat);
 
   const label = document.createElementNS('http://www.w3.org/2000/svg', 'text');
-  label.setAttribute('x', x - 45);
+  label.setAttribute('x', x - 25);
   label.setAttribute('y', y + 5);
   label.setAttribute('class', 'label');
   label.textContent = "Nieuwe boot";
+  label.addEventListener('click', (event) => {
+    event.stopPropagation();
+    selectBoot({}, group, id);
+  });
   group.appendChild(label);
 
   svg.appendChild(group);
