@@ -67,9 +67,9 @@ function selectBoot(boot, group, id) {
 // Boot opslaan naar Firebase
 function saveBoot() {
   if (!selectedBoot) return;
-  
+
   const { id, group } = selectedBoot;
-  const bootRect = group.querySelector('.boot'); // 👉 correcte variabele hier
+  const bootRect = group.querySelector('.boot'); // ✅ hier bootRect
   const bootLabel = group.querySelector('text');
 
   if (!bootRect) {
