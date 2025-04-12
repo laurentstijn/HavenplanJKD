@@ -24,20 +24,20 @@ function drawBoot(svg, boot, id) {
   const group = document.createElementNS('http://www.w3.org/2000/svg', 'g');
   group.setAttribute('class', 'bootgroep');
   group.setAttribute('data-id', id);
+  group.addEventListener('mousedown', startDrag); // <-- HIER: groep zelf slepen!
 
   // Boot romp (mooie ovale vorm)
   const ellipse = document.createElementNS('http://www.w3.org/2000/svg', 'ellipse');
-  const centerX = boot.x + 30; // midden van de boot
+  const centerX = boot.x + 30;
   const centerY = boot.y + 15;
   ellipse.setAttribute('cx', centerX);
   ellipse.setAttribute('cy', centerY);
-  ellipse.setAttribute('rx', (boot.lengte || 12) * 2);  // breedte
-  ellipse.setAttribute('ry', (boot.breedte || 4) * 2);  // hoogte
-  ellipse.setAttribute('fill', '#d0d0d0');              // lichtgrijze kleur
-  ellipse.setAttribute('stroke', '#555');               // donkere rand
+  ellipse.setAttribute('rx', (boot.lengte || 12) * 2);
+  ellipse.setAttribute('ry', (boot.breedte || 4) * 2);
+  ellipse.setAttribute('fill', '#d0d0d0');
+  ellipse.setAttribute('stroke', '#555');
   ellipse.setAttribute('stroke-width', 2);
   ellipse.classList.add('boot');
-  ellipse.addEventListener('mousedown', startDrag);
   group.appendChild(ellipse);
 
   // Boot naam
@@ -50,6 +50,7 @@ function drawBoot(svg, boot, id) {
 
   svg.appendChild(group);
 }
+
 
 // ➡️ Boot toevoegen aan menu
 function addBootToMenu(boot, id) {
