@@ -203,9 +203,6 @@ document.querySelectorAll('.ligplaats').forEach(ligplaats => {
     geselecteerdeLigplaats = ligplaats;
     document.getElementById('popup').style.display = 'block';
   });
-});
-
-
     database.ref('boten/' + id).set(newBoot, () => location.reload());
   });
 });
