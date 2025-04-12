@@ -54,3 +54,9 @@ button {
   stroke-width: 1; 
   cursor: pointer; 
 }
+
+.selected {
+  stroke: orange;
+  stroke-width: 3;
+}
+
