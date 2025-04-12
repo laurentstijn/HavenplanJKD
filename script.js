@@ -187,7 +187,7 @@ function saveBoot() {
       naam: bootLabel.textContent || "Boot",
       lengte: parseFloat(bootRect.getAttribute('width')) / 5,
       breedte: parseFloat(bootRect.getAttribute('height')) / 5,
-      eigenaar: oudeBoot.eigenaar || "",    // <<< HIER eigenaar behouden
+      eigenaar: oudeBoot.eigenaar || "",     // <<<< eigenaar behouden
       status: "aanwezig",
       x: parseFloat(bootRect.getAttribute('x')),
       y: parseFloat(bootRect.getAttribute('y')),
@@ -196,9 +196,6 @@ function saveBoot() {
 
     database.ref('boten/' + id).set(updatedBoot);
   });
-}
-
-  database.ref('boten/' + id).set(updatedBoot);
 }
 
 // Boot aanpassen vanuit menu
