@@ -48,15 +48,14 @@ button {
   cursor: pointer; 
 }
 
-.boot { 
-  fill: #e0e0e0; 
-  stroke: #555; 
-  stroke-width: 1; 
-  cursor: pointer; 
+.boot {
+  fill: #e0e0e0; /* normale kleur van een boot */
+  stroke: #555;  /* normale rand */
+  stroke-width: 1;
 }
 
-.selected {
+.boot.selected {
   stroke: orange;
-  stroke-width: 3;
+  stroke-width: 4;
 }
 
