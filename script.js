@@ -3,7 +3,7 @@ let dragging = false;
 let offsetX, offsetY;
 const database = firebase.database();
 
-// 🚀 Laad boten vanuit Firebase
+// 🚀 Laad boten uit Firebase
 function loadBoten() {
   const svg = document.getElementById('haven');
 
@@ -44,7 +44,7 @@ function drawBoot(svg, boot, id) {
   svg.appendChild(group);
 }
 
-// 🚀 Alleen klik op ligplaats ➔ nieuwe boot maken
+// ➡️ Alleen klik op ligplaats om nieuwe boot te maken
 document.querySelectorAll('.ligplaats').forEach(ligplaats => {
   ligplaats.addEventListener('click', async (e) => {
     e.stopPropagation();
@@ -59,129 +59,6 @@ document.querySelectorAll('.ligplaats').forEach(ligplaats => {
       return;
     }
 
-    // 🎯 Pop-up vragen naar boot info
+    // ➡️ Vraag info via pop-up
     const naam = prompt("Naam van de boot:", "Nieuwe boot") || "Nieuwe boot";
-    const lengteInput = prompt("Lengte van de boot (m):", "12");
-    const breedteInput = prompt("Breedte van de boot (m):", "4");
-
-    // 🚨 Validate input
-    let lengte = parseFloat(lengteInput);
-    let breedte = parseFloat(breedteInput);
-
-    if (isNaN(lengte) || lengte <= 0) lengte = 12;
-    if (isNaN(breedte) || breedte <= 0) breedte = 4;
-
-    const id = database.ref().child('boten').push().key;
-
-    const newBoot = {
-      naam: naam,
-      lengte: lengte,
-      breedte: breedte,
-      eigenaar: "",
-      status: "aanwezig",
-      x: parseFloat(ligplaats.getAttribute('x')) + 10,
-      y: parseFloat(ligplaats.getAttribute('y')) + 5,
-      ligplaats: ligplaatsId
-    };
-
-    database.ref('boten/' + id).set(newBoot);
-
-    drawBoot(svg, newBoot, id);
-  });
-});
-
-// 🚚 Start slepen
-function startDrag(e) {
-  // Deselecteer ALLE boten
-  document.querySelectorAll('.boot').forEach(boot => {
-    boot.classList.remove('selected');
-  });
-
-  // Selecteer de aangeklikte boot
-  const clickedBoot = e.target;
-  clickedBoot.classList.add('selected');
-
-  // Instellen welke boot we slepen
-  selectedBoot = {
-    group: e.target.parentNode,
-    id: e.target.parentNode.getAttribute('data-id')
-  };
-
-  dragging = true;
-  offsetX = e.offsetX;
-  offsetY = e.offsetY;
-
-  document.addEventListener('mousemove', drag);
-  document.addEventListener('mouseup', endDrag);
-}
-
-
-// 🚚 Sleep beweging
-function drag(e) {
-  if (!dragging) return;
-
-  const svg = document.getElementById('haven');
-  const pt = svg.createSVGPoint();
-  pt.x = e.clientX;
-  pt.y = e.clientY;
-  const cursorpt = pt.matrixTransform(svg.getScreenCTM().inverse());
-
-  const boot = selectedBoot.group.querySelector('.boot');
-  const label = selectedBoot.group.querySelector('text');
-
-  boot.setAttribute('x', cursorpt.x - 30);
-  boot.setAttribute('y', cursorpt.y - 10);
-  label.setAttribute('x', cursorpt.x - 25);
-  label.setAttribute('y', cursorpt.y + 5);
-}
-
-// 🚚 Stop slepen
-function endDrag(e) {
-  dragging = false;
-  saveBoot();
-  document.removeEventListener('mousemove', drag);
-  document.removeEventListener('mouseup', endDrag);
-}
-
-// 💾 Boot opslaan in Firebase
-function saveBoot() {
-  if (!selectedBoot) return;
-
-  const { id, group } = selectedBoot;
-  const bootRect = group.querySelector('.boot');
-  const bootLabel = group.querySelector('text');
-
-  if (!bootRect) return;
-
-  let lengte = parseFloat(bootRect.getAttribute('width')) / 5;
-  let breedte = parseFloat(bootRect.getAttribute('height')) / 5;
-
-  if (isNaN(lengte) || lengte <= 0) lengte = 12;
-  if (isNaN(breedte) || breedte <= 0) breedte = 4;
-
-  const updatedBoot = {
-    naam: bootLabel.textContent || "Boot",
-    lengte: lengte,
-    breedte: breedte,
-    eigenaar: "",
-    status: "aanwezig",
-    x: parseFloat(bootRect.getAttribute('x')),
-    y: parseFloat(bootRect.getAttribute('y')),
-    ligplaats: group.getAttribute('data-ligplaats')
-  };
-
-  database.ref('boten/' + id).set(updatedBoot);
-}
-
-// 🛥️ Boot verwijderen
-function deleteBoot() {
-  if (!selectedBoot) return;
-  const { id, group } = selectedBoot;
-
-  database.ref('boten/' + id).remove();
-  group.parentNode.removeChild(group);
-  selectedBoot = null;
-}
-
-// 🚀 Start: laad alles
-loadBoten();
+    const lengteInput = prompt("Lengte van de boot (m):
