@@ -56,9 +56,18 @@ document.querySelectorAll('.ligplaats').forEach(ligplaats => {
       return;
     }
 
-    const naam = prompt("Naam van de boot:", "Nieuwe boot") || "Nieuwe boot";
+    // 🎯 Vraag gegevens
+    const naam = prompt("Naam van de boot:", "Nieuwe boot");
+    if (naam === null || naam.trim() === "") {
+      // Als geannuleerd of leeg → stop
+      return;
+    }
+
     const lengteInput = prompt("Lengte van de boot (m):", "12");
+    if (lengteInput === null) return;
+
     const breedteInput = prompt("Breedte van de boot (m):", "4");
+    if (breedteInput === null) return;
 
     let lengte = parseFloat(lengteInput);
     let breedte = parseFloat(breedteInput);
@@ -69,7 +78,7 @@ document.querySelectorAll('.ligplaats').forEach(ligplaats => {
     const id = database.ref().child('boten').push().key;
 
     const newBoot = {
-      naam: naam,
+      naam: naam.trim() || "Nieuwe boot",
       lengte: lengte,
       breedte: breedte,
       eigenaar: "",
@@ -84,6 +93,7 @@ document.querySelectorAll('.ligplaats').forEach(ligplaats => {
     drawBoot(svg, newBoot, id);
   });
 });
+
 
 function startDrag(e) {
   document.querySelectorAll('.boot').forEach(boot => {
