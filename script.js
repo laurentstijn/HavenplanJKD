@@ -180,18 +180,20 @@ function endDrag(e) {
 function saveBoot() {
   if (!selectedBoot) return;
   const { id, group } = selectedBoot;
-  const bootRect = group.querySelector('.boot');
+  const bootRect = group.querySelector('.boot'); // Dit is de ellipse nu
   const bootLabel = group.querySelector('text');
+
   const updatedBoot = {
     naam: bootLabel.textContent || "Boot",
-    lengte: parseFloat(bootRect.getAttribute('width')) / 5,
-    breedte: parseFloat(bootRect.getAttribute('height')) / 5,
+    lengte: parseFloat(bootRect.getAttribute('rx')) / 2,   // <-- FIX
+    breedte: parseFloat(bootRect.getAttribute('ry')) / 2,   // <-- FIX
     eigenaar: "",
     status: "aanwezig",
-    x: parseFloat(bootRect.getAttribute('x')),
-    y: parseFloat(bootRect.getAttribute('y')),
+    x: parseFloat(bootRect.getAttribute('cx')) - 30,        // <-- center naar x omzetten
+    y: parseFloat(bootRect.getAttribute('cy')) - 15,        // <-- center naar y omzetten
     ligplaats: ""
   };
+
   database.ref('boten/' + id).set(updatedBoot);
 }
 
