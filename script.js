@@ -1,11 +1,10 @@
-
 let geselecteerdeLigplaats = null;
 let selectedBoot = null;
 let editBootId = null;
 let dragging = false;
 let startX, startY;
 const database = firebase.database();
-const schaalFactor = 5; // Kleinere schaalfactor
+const schaalFactor = 3; // Kleinere schaalfactor
 
 // Haven tekenen
 function tekenBasisHaven() {
@@ -67,7 +66,7 @@ function tekenBasisHaven() {
       document.getElementById('bootLengte').value = 12;
       document.getElementById('bootBreedte').value = 4;
       document.getElementById('bootEigenaar').value = "";
-      document.getElementById('popupLigplaats').value = "";
+      document.getElementById('popupLigplaats').value = ligplaats.id; // Ligplaats ID instellen
       document.getElementById('popup').style.display = 'block';
     });
   });
