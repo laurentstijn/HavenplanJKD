@@ -41,7 +41,6 @@ function drawBoot(svg, boot, id) {
   svg.appendChild(group);
 }
 
-
 function selectBoot(boot, group, id) {
   selectedBoot = {boot, group, id};
   document.getElementById('naam').value = boot.naam || '';
