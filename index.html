@@ -1,0 +1,59 @@
+
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+  <meta charset="UTF-8">
+  <title>Havenplan JKD</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<!-- SVG Haven -->
+<div id="haven-container">
+  <svg id="haven" viewBox="0 0 1000 600"></svg>
+</div>
+
+<!-- Menu -->
+<div id="menu">
+  <h2>Botenlijst</h2>
+  <div id="botenLijst"></div>
+</div>
+
+<!-- Popup Modal -->
+<div id="popup">
+  <h3 id="popupTitel">Nieuwe boot toevoegen</h3>
+  <label>Naam:</label>
+  <input type="text" id="bootNaam">
+  <label>Lengte (m):</label>
+  <input type="number" id="bootLengte" value="12">
+  <label>Breedte (m):</label>
+  <input type="number" id="bootBreedte" value="4">
+  <label>Eigenaar:</label>
+  <input type="text" id="bootEigenaar">
+  <div class="popup-buttons">
+    <button onclick="bevestigBoot()">Opslaan</button>
+    <button onclick="annuleerBoot()">Annuleren</button>
+  </div>
+</div>
+
+<!-- Firebase -->
+<script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-database-compat.js"></script>
+<script>
+const firebaseConfig = {
+  apiKey: "AIzaSyD1KyhwzPqFHnXt2S1OCaWGVYXUde6mj-8",
+  authDomain: "havenplan-jkd.firebaseapp.com",
+  databaseURL: "https://havenplan-jkd-default-rtdb.europe-west1.firebasedatabase.app",
+  projectId: "havenplan-jkd",
+  storageBucket: "havenplan-jkd.appspot.com",
+  messagingSenderId: "126216147433",
+  appId: "1:126216147433:web:f23132c7c4db395368bb78"
+};
+firebase.initializeApp(firebaseConfig);
+</script>
+
+<!-- Eigen Script -->
+<script src="script.js"></script>
+
+</body>
+</html>
