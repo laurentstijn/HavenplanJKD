@@ -181,7 +181,7 @@ function editBoot(id) {
     document.getElementById('bootNaam').value = boot.naam;
     document.getElementById('bootLengte').value = boot.lengte;
     document.getElementById('bootBreedte').value = boot.breedte;
-    document.getElementById('bootEigenaar').value = boot.eigenaar || "";
+    document.getElementById('bootEigenaar').value = boot.eigenaar;
     document.getElementById('popup').style.display = 'block';
   });
 }
