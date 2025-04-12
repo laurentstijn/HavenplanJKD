@@ -223,6 +223,22 @@ function saveBoot() {
   const bootRect = group.querySelector('.boot');
   const bootLabel = group.querySelector('text');
 
+  const bootX = parseFloat(bootRect.getAttribute('x'));
+  const bootY = parseFloat(bootRect.getAttribute('y'));
+
+  let nieuweLigplaats = "";
+
+  // ➔ Zoek of boot in een ligplaats ligt
+  document.querySelectorAll('.ligplaats').forEach(ligplaats => {
+    const lx = parseFloat(ligplaats.getAttribute('x'));
+    const ly = parseFloat(ligplaats.getAttribute('y'));
+    const lw = parseFloat(ligplaats.getAttribute('width'));
+    const lh = parseFloat(ligplaats.getAttribute('height'));
+    if (bootX >= lx && bootX <= lx + lw && bootY >= ly && bootY <= ly + lh) {
+      nieuweLigplaats = ligplaats.id; // ➔ nieuwe ligplaats ID
+    }
+  });
+
   database.ref('boten/' + id).once('value').then(snapshot => {
     const oudeBoot = snapshot.val() || {};
 
@@ -232,9 +248,9 @@ function saveBoot() {
       breedte: parseFloat(bootRect.getAttribute('height')) / schaalFactor,
       eigenaar: oudeBoot.eigenaar || "",
       status: "aanwezig",
-      x: parseFloat(bootRect.getAttribute('x')),
-      y: parseFloat(bootRect.getAttribute('y')),
-      ligplaats: oudeBoot.ligplaats || ""
+      x: bootX,
+      y: bootY,
+      ligplaats: nieuweLigplaats // ➔ hier de nieuwe ligplaats mee opslaan
     };
 
     database.ref('boten/' + id).set(updatedBoot);
