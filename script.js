@@ -180,16 +180,23 @@ function saveBoot() {
   const bootRect = group.querySelector('.boot');
   const bootLabel = group.querySelector('text');
 
-  const updatedBoot = {
-    naam: bootLabel.textContent || "Boot",
-    lengte: parseFloat(bootRect.getAttribute('width')) / 5,
-    breedte: parseFloat(bootRect.getAttribute('height')) / 5,
-    eigenaar: "",
-    status: "aanwezig",
-    x: parseFloat(bootRect.getAttribute('x')),
-    y: parseFloat(bootRect.getAttribute('y')),
-    ligplaats: ""
-  };
+  database.ref('boten/' + id).once('value').then(snapshot => {
+    const oudeBoot = snapshot.val() || {};
+
+    const updatedBoot = {
+      naam: bootLabel.textContent || "Boot",
+      lengte: parseFloat(bootRect.getAttribute('width')) / 5,
+      breedte: parseFloat(bootRect.getAttribute('height')) / 5,
+      eigenaar: oudeBoot.eigenaar || "",    // <<< HIER eigenaar behouden
+      status: "aanwezig",
+      x: parseFloat(bootRect.getAttribute('x')),
+      y: parseFloat(bootRect.getAttribute('y')),
+      ligplaats: oudeBoot.ligplaats || ""
+    };
+
+    database.ref('boten/' + id).set(updatedBoot);
+  });
+}
 
   database.ref('boten/' + id).set(updatedBoot);
 }
