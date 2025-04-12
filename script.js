@@ -103,7 +103,6 @@ function startDrag(e) {
   document.addEventListener('mouseup', endDrag);
 }
 
-
 // ➡️ Tijdens slepen
 function drag(e) {
   if (!selectedBoot) return;
@@ -138,7 +137,6 @@ function endDrag(e) {
     saveBoot();
   }
 }
-
 
   const wachtzone = document.getElementById('wachtzone');
   const wx = parseFloat(wachtzone.getAttribute('x'));
