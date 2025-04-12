@@ -235,9 +235,20 @@ function saveBoot() {
     const lw = parseFloat(ligplaats.getAttribute('width'));
     const lh = parseFloat(ligplaats.getAttribute('height'));
     if (bootX >= lx && bootX <= lx + lw && bootY >= ly && bootY <= ly + lh) {
-      nieuweLigplaats = ligplaats.id; // ➔ nieuwe ligplaats ID
+      nieuweLigplaats = ligplaats.id; // ➔ nieuwe ligplaats gevonden
     }
   });
+
+  // ➔ Controleer of boot in wachtzone zit
+  const wachtzone = document.getElementById('wachtzone');
+  const wx = parseFloat(wachtzone.getAttribute('x'));
+  const wy = parseFloat(wachtzone.getAttribute('y'));
+  const ww = parseFloat(wachtzone.getAttribute('width'));
+  const wh = parseFloat(wachtzone.getAttribute('height'));
+
+  if (bootX >= wx && bootX <= wx + ww && bootY >= wy && bootY <= wy + wh) {
+    nieuweLigplaats = ""; // ➔ In wachtzone = geen ligplaats
+  }
 
   database.ref('boten/' + id).once('value').then(snapshot => {
     const oudeBoot = snapshot.val() || {};
@@ -250,7 +261,7 @@ function saveBoot() {
       status: "aanwezig",
       x: bootX,
       y: bootY,
-      ligplaats: nieuweLigplaats // ➔ hier de nieuwe ligplaats mee opslaan
+      ligplaats: nieuweLigplaats // ➔ hier juiste ligplaats (of leeg)
     };
 
     database.ref('boten/' + id).set(updatedBoot);
