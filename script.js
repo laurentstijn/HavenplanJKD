@@ -196,36 +196,50 @@ function saveBoot() {
 }
 
 // ➡️ Klik op ligplaats ➔ Boot toevoegen
+// Klik op ligplaats opent nu popup
 document.querySelectorAll('.ligplaats').forEach(ligplaats => {
-  ligplaats.addEventListener('click', async (e) => {
+  ligplaats.addEventListener('click', (e) => {
     e.stopPropagation();
-    const naam = prompt("Naam van de boot:", "Nieuwe boot");
-    if (naam === null || naam.trim() === "") return;
+    geselecteerdeLigplaats = ligplaats;
+    document.getElementById('popup').style.display = 'block';
+  });
+});
 
-    const lengteInput = prompt("Lengte van de boot (meter):", "12");
-    if (lengteInput === null) return;
-
-    const breedteInput = prompt("Breedte van de boot (meter):", "4");
-    if (breedteInput === null) return;
-
-    const lengte = parseFloat(lengteInput) || 12;
-    const breedte = parseFloat(breedteInput) || 4;
-    const id = database.ref().child('boten').push().key;
-
-    const newBoot = {
-      naam: naam.trim(),
-      lengte: lengte,
-      breedte: breedte,
-      eigenaar: "",
-      status: "aanwezig",
-      x: parseFloat(ligplaats.getAttribute('x')) + 10,
-      y: parseFloat(ligplaats.getAttribute('y')) + 5,
-      ligplaats: ligplaats.id
-    };
 
     database.ref('boten/' + id).set(newBoot, () => location.reload());
   });
 });
+
+function bevestigBoot() {
+  const naam = document.getElementById('bootNaam').value.trim();
+  const lengte = parseFloat(document.getElementById('bootLengte').value) || 12;
+  const breedte = parseFloat(document.getElementById('bootBreedte').value) || 4;
+  const eigenaar = document.getElementById('bootEigenaar').value.trim();
+  
+  if (!naam || !geselecteerdeLigplaats) {
+    alert("Vul alle velden correct in.");
+    return;
+  }
+
+  const id = database.ref().child('boten').push().key;
+
+  const newBoot = {
+    naam: naam,
+    lengte: lengte,
+    breedte: breedte,
+    eigenaar: eigenaar,
+    status: "aanwezig",
+    x: parseFloat(geselecteerdeLigplaats.getAttribute('x')) + 10,
+    y: parseFloat(geselecteerdeLigplaats.getAttribute('y')) + 5,
+    ligplaats: geselecteerdeLigplaats.id
+  };
+
+  database.ref('boten/' + id).set(newBoot, () => location.reload());
+}
+
+function annuleerBoot() {
+  document.getElementById('popup').style.display = 'none';
+}
 
 // 🚀 Start
 loadBoten();
