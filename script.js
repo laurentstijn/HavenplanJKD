@@ -10,7 +10,6 @@ const schaalFactor = 3;
 function tekenBasisHaven() {
   const svg = document.getElementById('haven');
 
-  // SVG leegmaken (géén innerHTML)
   while (svg.firstChild) {
     svg.removeChild(svg.firstChild);
   }
@@ -42,7 +41,7 @@ function tekenBasisHaven() {
   steiger3.setAttribute('height', 400);
   svg.appendChild(steiger3);
 
-  // 30 Ligplaatsen
+  // Ligplaatsen
   for (let i = 0; i < 30; i++) {
     const rect = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
     rect.setAttribute('class', 'ligplaats');
@@ -88,7 +87,7 @@ function tekenBasisHaven() {
 
 // Boten laden na vertraging
 function loadBoten() {
-  tekenBasisHaven(); // eerst haven tekenen
+  tekenBasisHaven();
 
   const lijst = document.getElementById('botenLijst');
   lijst.innerHTML = '';
@@ -103,7 +102,7 @@ function loadBoten() {
         });
       }
     });
-  }, 100); // <-- hier correct afsluiten
+  }, 100);
 }
 
 // Boot tekenen
@@ -111,7 +110,6 @@ function drawBoot(svg, boot, id) {
   const group = document.createElementNS('http://www.w3.org/2000/svg', 'g');
   group.setAttribute('class', 'bootgroep');
   group.setAttribute('data-id', id);
-  group.addEventListener('mousedown', startDrag);
 
   const rect = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
   rect.setAttribute('x', boot.x);
@@ -131,6 +129,7 @@ function drawBoot(svg, boot, id) {
   label.textContent = boot.naam || "Boot";
   group.appendChild(label);
 
+  group.addEventListener('mousedown', startDrag);
   svg.appendChild(group);
 }
 
@@ -143,6 +142,53 @@ function addBootToMenu(boot, id) {
     <button onclick="editBoot('${id}')">✏️</button>
     <button onclick="deleteBoot('${id}')">🗑️</button>`;
   lijst.appendChild(div);
+}
+
+// Boot opslaan
+function bevestigBoot() {
+  const naam = document.getElementById('bootNaam').value.trim();
+  const lengte = parseFloat(document.getElementById('bootLengte').value) || 12;
+  const breedte = parseFloat(document.getElementById('bootBreedte').value) || 4;
+  const eigenaar = document.getElementById('bootEigenaar').value.trim();
+
+  if (!naam) {
+    alert("Vul alle velden correct in.");
+    return;
+  }
+
+  if (editBootId) {
+    // Bestaande boot aanpassen
+    database.ref('boten/' + editBootId).once('value').then(snapshot => {
+      const boot = snapshot.val();
+      if (!boot) return;
+
+      boot.naam = naam;
+      boot.lengte = lengte;
+      boot.breedte = breedte;
+      boot.eigenaar = eigenaar;
+
+      database.ref('boten/' + editBootId).set(boot, () => location.reload());
+    });
+  } else {
+    // Nieuwe boot toevoegen
+    const id = database.ref().child('boten').push().key;
+    const newBoot = {
+      naam: naam,
+      lengte: lengte,
+      breedte: breedte,
+      eigenaar: eigenaar,
+      status: "aanwezig",
+      x: parseFloat(geselecteerdeLigplaats.getAttribute('x')) + 10,
+      y: parseFloat(geselecteerdeLigplaats.getAttribute('y')) + 5,
+      ligplaats: geselecteerdeLigplaats.id
+    };
+    database.ref('boten/' + id).set(newBoot, () => location.reload());
+  }
+}
+
+// Popup sluiten
+function annuleerBoot() {
+  document.getElementById('popup').style.display = 'none';
 }
 
 // Start
