@@ -10,13 +10,13 @@ fetch('boten.json')
     drawBoot(svg, boot, index);
   });
 
-  // Klik ergens in de haven om een nieuwe boot toe te voegen
+  // Klik op vrije ruimte om nieuwe boot toe te voegen
   svg.addEventListener('click', (e) => {
     if (
       e.target.tagName === 'rect' && 
-      (e.target.classList.contains('boot') || e.target.parentNode.classList.contains('ligplaats'))
+      (e.target.classList.contains('boot') || e.target.classList.contains('steiger'))
     ) {
-      return; // Klikte op bestaande boot -> geen nieuwe boot maken
+      return; // Klikte op een boot of steiger -> geen nieuwe boot maken
     }
 
     const svgRect = svg.getBoundingClientRect();
@@ -30,7 +30,7 @@ fetch('boten.json')
   });
 });
 
-// Functie om een boot te tekenen (ZONDER blauwe kader)
+// Functie om bestaande boten te tekenen
 function drawBoot(svg, boot, id) {
   const group = document.createElementNS('http://www.w3.org/2000/svg', 'g');
   group.setAttribute('class', 'ligplaats');
@@ -53,16 +53,12 @@ function drawBoot(svg, boot, id) {
   label.setAttribute('y', boot.y + 20);
   label.setAttribute('class', 'label');
   label.textContent = boot.naam || 'Boot';
-  label.addEventListener('click', (event) => {
-    event.stopPropagation();
-    selectBoot(boot, group, id);
-  });
   group.appendChild(label);
 
   svg.appendChild(group);
 }
 
-// Functie om een boot te selecteren en formulier te vullen
+// Functie om geselecteerde boot te highlighten en formulier te vullen
 function selectBoot(boot, group, id) {
   selectedBoot = { boot, group, id };
 
@@ -71,7 +67,7 @@ function selectBoot(boot, group, id) {
     boot.classList.remove('selected');
   });
 
-  // Highlight de geselecteerde boot
+  // Highlight de nieuwe geselecteerde boot
   const bootRect = group.querySelector('.boot');
   if (bootRect) {
     bootRect.classList.add('selected');
@@ -85,7 +81,6 @@ function selectBoot(boot, group, id) {
   document.getElementById('status').value = boot.status || 'aanwezig';
 }
 
-
 // Functie om geselecteerde boot op te slaan
 function saveBoot() {
   if (!selectedBoot) return;
@@ -96,8 +91,6 @@ function saveBoot() {
   const naam = document.getElementById('naam').value;
   const lengte = parseFloat(document.getElementById('lengte').value);
   const breedte = parseFloat(document.getElementById('breedte').value);
-  const eigenaar = document.getElementById('eigenaar').value;
-  const status = document.getElementById('status').value;
 
   boatRect.setAttribute('width', lengte * 5);
   boatRect.setAttribute('height', breedte * 5);
@@ -115,10 +108,10 @@ function deleteBoot() {
   selectedBoot = null;
 }
 
-// Functie om nieuwe boot te maken (ZONDER blauwe kader)
+// Functie om nieuwe boot te maken bij klik
 function createNewBoot(x, y) {
   const svg = document.getElementById('haven');
-  const id = Date.now(); // Uniek ID gebaseerd op tijd
+  const id = Date.now();
 
   const group = document.createElementNS('http://www.w3.org/2000/svg', 'g');
   group.setAttribute('class', 'ligplaats');
@@ -141,14 +134,10 @@ function createNewBoot(x, y) {
   label.setAttribute('y', y + 5);
   label.setAttribute('class', 'label');
   label.textContent = "Nieuwe boot";
-  label.addEventListener('click', (event) => {
-    event.stopPropagation();
-    selectBoot({}, group, id);
-  });
   group.appendChild(label);
 
   svg.appendChild(group);
 
-  // Open direct het invulformulier
+  // Direct selecteren
   selectBoot({}, group, id);
 }
