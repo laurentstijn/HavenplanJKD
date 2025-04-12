@@ -59,6 +59,7 @@ function tekenBasisHaven() {
   wachtzone.setAttribute('height', 500);
   svg.appendChild(wachtzone);
 
+  // Ligplaatsen klikbaar maken
   document.querySelectorAll('.ligplaats').forEach(ligplaats => {
     ligplaats.addEventListener('click', (e) => {
       e.stopPropagation();
@@ -69,6 +70,7 @@ function tekenBasisHaven() {
       document.getElementById('bootLengte').value = 12;
       document.getElementById('bootBreedte').value = 4;
       document.getElementById('bootEigenaar').value = "";
+      document.getElementById('popupLigplaats').value = "";
       document.getElementById('popup').style.display = 'block';
     });
   });
@@ -98,7 +100,6 @@ function loadBoten() {
         });
       }
 
-      // Bezetting verbergen
       bezetteLigplaatsen.forEach(ligplaatsId => {
         const ligplaats = document.getElementById(ligplaatsId);
         if (ligplaats) {
@@ -201,16 +202,47 @@ function endDrag(e) {
     return;
   }
 
-  // ➔ Ligplaats vrijmaken als boot verhuist
-  database.ref('boten/' + selectedBoot.id).once('value').then(snapshot => {
-    const oudeBoot = snapshot.val();
-    if (oudeBoot && oudeBoot.ligplaats) {
-      const oudeLigplaats = document.getElementById(oudeBoot.ligplaats);
-      if (oudeLigplaats) {
-        oudeLigplaats.style.display = 'block';
-      }
+  const bootRect = selectedBoot.group.querySelector('.boot');
+  const label = selectedBoot.group.querySelector('text');
+  const bootX = parseFloat(bootRect.getAttribute('x'));
+  const bootY = parseFloat(bootRect.getAttribute('y'));
+
+  let binnenLigplaats = false;
+  document.querySelectorAll('.ligplaats').forEach(ligplaats => {
+    const lx = parseFloat(ligplaats.getAttribute('x'));
+    const ly = parseFloat(ligplaats.getAttribute('y'));
+    const lw = parseFloat(ligplaats.getAttribute('width'));
+    const lh = parseFloat(ligplaats.getAttribute('height'));
+    if (bootX >= lx && bootX <= lx + lw && bootY >= ly && bootY <= ly + lh) {
+      binnenLigplaats = true;
     }
   });
+
+  const wachtzone = document.getElementById('wachtzone');
+  const wx = parseFloat(wachtzone.getAttribute('x'));
+  const wy = parseFloat(wachtzone.getAttribute('y'));
+  const ww = parseFloat(wachtzone.getAttribute('width'));
+  const wh = parseFloat(wachtzone.getAttribute('height'));
+
+  if (!binnenLigplaats && !(bootX >= wx && bootX <= wx + ww && bootY >= wy && bootY <= wy + wh)) {
+    let count = 0;
+    document.querySelectorAll('.boot').forEach(b => {
+      const bx = parseFloat(b.getAttribute('x'));
+      const by = parseFloat(b.getAttribute('y'));
+      if (bx >= wx && bx <= wx + ww && by >= wy && by <= wy + wh) {
+        count++;
+      }
+    });
+
+    const spacing = 30;
+    const newX = wx + 10;
+    const newY = wy + 10 + count * spacing;
+
+    bootRect.setAttribute('x', newX);
+    bootRect.setAttribute('y', newY);
+    label.setAttribute('x', newX + 5);
+    label.setAttribute('y', newY + 20);
+  }
 
   saveBoot();
 }
@@ -226,29 +258,7 @@ function saveBoot() {
   const bootX = parseFloat(bootRect.getAttribute('x'));
   const bootY = parseFloat(bootRect.getAttribute('y'));
 
-  let nieuweLigplaats = "";
-
-  // ➔ Zoek of boot in een ligplaats ligt
-  document.querySelectorAll('.ligplaats').forEach(ligplaats => {
-    const lx = parseFloat(ligplaats.getAttribute('x'));
-    const ly = parseFloat(ligplaats.getAttribute('y'));
-    const lw = parseFloat(ligplaats.getAttribute('width'));
-    const lh = parseFloat(ligplaats.getAttribute('height'));
-    if (bootX >= lx && bootX <= lx + lw && bootY >= ly && bootY <= ly + lh) {
-      nieuweLigplaats = ligplaats.id; // ➔ nieuwe ligplaats gevonden
-    }
-  });
-
-  // ➔ Controleer of boot in wachtzone zit
-  const wachtzone = document.getElementById('wachtzone');
-  const wx = parseFloat(wachtzone.getAttribute('x'));
-  const wy = parseFloat(wachtzone.getAttribute('y'));
-  const ww = parseFloat(wachtzone.getAttribute('width'));
-  const wh = parseFloat(wachtzone.getAttribute('height'));
-
-  if (bootX >= wx && bootX <= wx + ww && bootY >= wy && bootY <= wy + wh) {
-    nieuweLigplaats = ""; // ➔ In wachtzone = geen ligplaats
-  }
+  let nieuweLigplaats = document.getElementById('bootLigplaats').value;
 
   database.ref('boten/' + id).once('value').then(snapshot => {
     const oudeBoot = snapshot.val() || {};
@@ -261,7 +271,7 @@ function saveBoot() {
       status: "aanwezig",
       x: bootX,
       y: bootY,
-      ligplaats: nieuweLigplaats // ➔ hier juiste ligplaats (of leeg)
+      ligplaats: nieuweLigplaats // Ligplaats wordt opgeslagen
     };
 
     database.ref('boten/' + id).set(updatedBoot);
@@ -281,6 +291,7 @@ function editBoot(id) {
     document.getElementById('bootLengte').value = boot.lengte;
     document.getElementById('bootBreedte').value = boot.breedte;
     document.getElementById('bootEigenaar').value = boot.eigenaar || "";
+    document.getElementById('bootLigplaats').value = boot.ligplaats || "";
     document.getElementById('popup').style.display = 'block';
   });
 }
@@ -298,6 +309,7 @@ function bevestigBoot() {
   const lengte = parseFloat(document.getElementById('bootLengte').value) || 12;
   const breedte = parseFloat(document.getElementById('bootBreedte').value) || 4;
   const eigenaar = document.getElementById('bootEigenaar').value.trim();
+  const ligplaats = document.getElementById('bootLigplaats').value;
 
   if (!naam) {
     alert("Vul alle velden correct in.");
@@ -312,6 +324,8 @@ function bevestigBoot() {
       boot.lengte = lengte;
       boot.breedte = breedte;
       boot.eigenaar = eigenaar;
+      boot.ligplaats = ligplaats;
+
       database.ref('boten/' + editBootId).set(boot, () => location.reload());
     });
   } else {
@@ -324,7 +338,7 @@ function bevestigBoot() {
       status: "aanwezig",
       x: parseFloat(geselecteerdeLigplaats.getAttribute('x')) + 10,
       y: parseFloat(geselecteerdeLigplaats.getAttribute('y')) + 5,
-      ligplaats: geselecteerdeLigplaats.id
+      ligplaats: ligplaats || ""
     };
     database.ref('boten/' + id).set(newBoot, () => location.reload());
   }
