@@ -121,3 +121,12 @@ function endDrag(e) {
       document.getElementById('popup').style.display = 'block';
     });
   } else {
+    // Wel bewogen ➔ Echt slepen
+    saveBoot();
+  }
+}
+
+// Boot opslaan na slepen
+function saveBoot() {
+  if (!selectedBoot) return;
+  const
