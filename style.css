@@ -37,27 +37,28 @@ button {
   width: 48%; 
 }
 
-/* 🎯 Steigers behouden */
+/* 🎯 Steigers */
 .steiger { 
-  fill: #c2b8a3; /* mooie lichtbruine kleur voor steigers */
+  fill: #c2b8a3; /* Lichtbruin voor steigers */
+  stroke: none;
 }
 
-/* 🎯 Boten normaal */
+/* 🎯 Boten standaard */
 .boot {
-  fill: #e0e0e0; /* lichtgrijs voor de boot */
-  stroke: #555;  /* standaard donkere rand */
+  fill: #e0e0e0; /* Lichtgrijs voor boot */
+  stroke: #555;  /* Donkere rand */
   stroke-width: 1;
 }
 
-/* 🎯 Boten als ze geselecteerd zijn */
+/* 🎯 Boten als geselecteerd */
 .boot.selected {
-  stroke: orange; /* oranje rand als geselecteerd */
+  stroke: orange; /* Oranje dikke rand */
   stroke-width: 4;
 }
 
-/* 🎯 Tekst labels */
+/* 🎯 Labels op boten */
 .label {
   font-size: 12px;
   fill: #333;
-  pointer-events: none; /* Tekst niet klikbaar maken (alleen boot zelf) */
+  pointer-events: none;
 }
