@@ -146,11 +146,26 @@ function endDrag(e) {
 
     if (!binnenLigplaats &&
         !(bootX >= wx && bootX <= wx + ww && bootY >= wy && bootY <= wy + wh)) {
-      // Niet in ligplaats en niet in wachtzone ➔ zet naar wachtzone
-      bootRect.setAttribute('x', wx + 10);
-      bootRect.setAttribute('y', wy + 10);
-      label.setAttribute('x', wx + 15);
-      label.setAttribute('y', wy + 30);
+
+      // Tel hoeveel boten al in de wachtzone zitten
+      let count = 0;
+      document.querySelectorAll('.boot').forEach(b => {
+        const bx = parseFloat(b.getAttribute('x'));
+        const by = parseFloat(b.getAttribute('y'));
+        if (bx >= wx && bx <= wx + ww && by >= wy && by <= wy + wh) {
+          count++;
+        }
+      });
+
+      // Zet boot onder elkaar in de wachtzone
+      const spacing = 30; // afstand tussen boten
+      const newX = wx + 10;
+      const newY = wy + 10 + count * spacing;
+
+      bootRect.setAttribute('x', newX);
+      bootRect.setAttribute('y', newY);
+      label.setAttribute('x', newX + 5);
+      label.setAttribute('y', newY + 20);
     }
 
     saveBoot();
