@@ -86,12 +86,28 @@ function loadBoten() {
   setTimeout(() => {
     database.ref('boten').once('value').then(snapshot => {
       const data = snapshot.val();
+      const bezetteLigplaatsen = new Set(); // ➔ nieuwe set
+
       if (data) {
         Object.keys(data).forEach(id => {
-          drawBoot(document.getElementById('haven'), data[id], id);
-          addBootToMenu(data[id], id);
+          const boot = data[id];
+          drawBoot(document.getElementById('haven'), boot, id);
+          addBootToMenu(boot, id);
+
+          // ➔ Verzamel ligplaatsen die bezet zijn
+          if (boot.ligplaats) {
+            bezetteLigplaatsen.add(boot.ligplaats);
+          }
         });
       }
+
+      // ➔ Ligplaatsen verbergen die bezet zijn
+      bezetteLigplaatsen.forEach(ligplaatsId => {
+        const ligplaats = document.getElementById(ligplaatsId);
+        if (ligplaats) {
+          ligplaats.style.display = 'none';
+        }
+      });
     });
   }, 100);
 }
