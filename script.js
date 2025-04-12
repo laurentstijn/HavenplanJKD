@@ -92,6 +92,16 @@ document.querySelectorAll('.ligplaats').forEach(ligplaats => {
 
 // 🚚 Start slepen
 function startDrag(e) {
+  // Deselecteer ALLE boten
+  document.querySelectorAll('.boot').forEach(boot => {
+    boot.classList.remove('selected');
+  });
+
+  // Selecteer de aangeklikte boot
+  const clickedBoot = e.target;
+  clickedBoot.classList.add('selected');
+
+  // Instellen welke boot we slepen
   selectedBoot = {
     group: e.target.parentNode,
     id: e.target.parentNode.getAttribute('data-id')
@@ -104,6 +114,7 @@ function startDrag(e) {
   document.addEventListener('mousemove', drag);
   document.addEventListener('mouseup', endDrag);
 }
+
 
 // 🚚 Sleep beweging
 function drag(e) {
