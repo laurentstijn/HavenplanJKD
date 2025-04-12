@@ -8,17 +8,22 @@ body {
 
 /* Menu kleiner maken */
 #menu {
-  width: 250px;  /* Menu smaller */
+  width: 150px;  /* Menu smaller */
   font-size: 12px;  /* Kleinere tekst */
   background-color: #f4f4f4;
   padding: 10px;
   box-sizing: border-box;
+  position: fixed;
+  right: 0;
+  top: 0;
+  bottom: 0;
+  overflow-y: auto;
 }
 
 /* Haven container */
 #haven-container {
-  margin-left: 160px;  /* Ruimte voor het menu */
-  margin-right: 10px;  /* Ruimte aan de rechterkant */
+  margin-right: 160px;  /* Ruimte voor het menu */
+  margin-left: 20px;  /* Ruimte aan de linkerzijde */
 }
 
 /* Pop-up venster */
