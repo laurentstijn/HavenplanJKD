@@ -4,7 +4,7 @@ let editBootId = null;
 let dragging = false;
 let startX, startY;
 const database = firebase.database();
-const schaalFactor = 3;
+const schaalFactor = 5;
 
 // Haven tekenen
 function tekenBasisHaven() {
@@ -40,7 +40,6 @@ function tekenBasisHaven() {
     rect.setAttribute('y', 140 + (i % 15) * 35);
     svg.appendChild(rect);
 
-    // Ligplaats-nummer toevoegen in ligplaats
     const label = document.createElementNS('http://www.w3.org/2000/svg', 'text');
     label.setAttribute('x', parseFloat(rect.getAttribute('x')) + 10);
     label.setAttribute('y', parseFloat(rect.getAttribute('y')) + 20);
@@ -60,7 +59,6 @@ function tekenBasisHaven() {
   wachtzone.setAttribute('height', 500);
   svg.appendChild(wachtzone);
 
-  // Ligplaatsen klikbaar maken
   document.querySelectorAll('.ligplaats').forEach(ligplaats => {
     ligplaats.addEventListener('click', (e) => {
       e.stopPropagation();
@@ -86,7 +84,7 @@ function loadBoten() {
   setTimeout(() => {
     database.ref('boten').once('value').then(snapshot => {
       const data = snapshot.val();
-      const bezetteLigplaatsen = new Set(); // ➔ nieuwe set
+      const bezetteLigplaatsen = new Set();
 
       if (data) {
         Object.keys(data).forEach(id => {
@@ -94,14 +92,13 @@ function loadBoten() {
           drawBoot(document.getElementById('haven'), boot, id);
           addBootToMenu(boot, id);
 
-          // ➔ Verzamel ligplaatsen die bezet zijn
           if (boot.ligplaats) {
             bezetteLigplaatsen.add(boot.ligplaats);
           }
         });
       }
 
-      // ➔ Ligplaatsen verbergen die bezet zijn
+      // Bezetting verbergen
       bezetteLigplaatsen.forEach(ligplaatsId => {
         const ligplaats = document.getElementById(ligplaatsId);
         if (ligplaats) {
@@ -204,52 +201,21 @@ function endDrag(e) {
     return;
   }
 
-  const bootRect = selectedBoot.group.querySelector('.boot');
-  const label = selectedBoot.group.querySelector('text');
-  const bootX = parseFloat(bootRect.getAttribute('x'));
-  const bootY = parseFloat(bootRect.getAttribute('y'));
-
-  let binnenLigplaats = false;
-  document.querySelectorAll('.ligplaats').forEach(ligplaats => {
-    const lx = parseFloat(ligplaats.getAttribute('x'));
-    const ly = parseFloat(ligplaats.getAttribute('y'));
-    const lw = parseFloat(ligplaats.getAttribute('width'));
-    const lh = parseFloat(ligplaats.getAttribute('height'));
-    if (bootX >= lx && bootX <= lx + lw && bootY >= ly && bootY <= ly + lh) {
-      binnenLigplaats = true;
+  // ➔ Ligplaats vrijmaken als boot verhuist
+  database.ref('boten/' + selectedBoot.id).once('value').then(snapshot => {
+    const oudeBoot = snapshot.val();
+    if (oudeBoot && oudeBoot.ligplaats) {
+      const oudeLigplaats = document.getElementById(oudeBoot.ligplaats);
+      if (oudeLigplaats) {
+        oudeLigplaats.style.display = 'block';
+      }
     }
   });
-
-  const wachtzone = document.getElementById('wachtzone');
-  const wx = parseFloat(wachtzone.getAttribute('x'));
-  const wy = parseFloat(wachtzone.getAttribute('y'));
-  const ww = parseFloat(wachtzone.getAttribute('width'));
-  const wh = parseFloat(wachtzone.getAttribute('height'));
-
-  if (!binnenLigplaats && !(bootX >= wx && bootX <= wx + ww && bootY >= wy && bootY <= wy + wh)) {
-    let count = 0;
-    document.querySelectorAll('.boot').forEach(b => {
-      const bx = parseFloat(b.getAttribute('x'));
-      const by = parseFloat(b.getAttribute('y'));
-      if (bx >= wx && bx <= wx + ww && by >= wy && by <= wy + wh) {
-        count++;
-      }
-    });
-
-    const spacing = 30;
-    const newX = wx + 10;
-    const newY = wy + 10 + count * spacing;
-
-    bootRect.setAttribute('x', newX);
-    bootRect.setAttribute('y', newY);
-    label.setAttribute('x', newX + 5);
-    label.setAttribute('y', newY + 20);
-  }
 
   saveBoot();
 }
 
-// Boot opslaan na slepen
+// Boot opslaan
 function saveBoot() {
   if (!selectedBoot) return;
 
@@ -275,7 +241,7 @@ function saveBoot() {
   });
 }
 
-// Boot aanpassen vanuit menu of klik
+// Boot aanpassen
 function editBoot(id) {
   database.ref('boten/' + id).once('value').then(snapshot => {
     const boot = snapshot.val();
@@ -299,7 +265,7 @@ function deleteBoot(id) {
   }
 }
 
-// Popup Opslaan
+// Popup opslaan
 function bevestigBoot() {
   const naam = document.getElementById('bootNaam').value.trim();
   const lengte = parseFloat(document.getElementById('bootLengte').value) || 12;
@@ -337,7 +303,7 @@ function bevestigBoot() {
   }
 }
 
-// Popup Annuleren
+// Popup annuleren
 function annuleerBoot() {
   document.getElementById('popup').style.display = 'none';
 }
