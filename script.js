@@ -130,5 +130,94 @@ function endDrag(e) {
 
   if (distance < 5) {
     // Kleine beweging ➔ behandelen als klik
+    editBoot(selectedBoot.id);
+  } else {
+    // Groot genoeg ➔ behandelen als sleep
+    const boot = selectedBoot.group.querySelector('.boot');
+    const label = selectedBoot.group.querySelector('text');
+    const bootX = parseFloat(boot.getAttribute('x'));
+    const bootY = parseFloat(boot.getAttribute('y'));
+
+    let binnenLigplaats = false;
+    document.querySelectorAll('.ligplaats').forEach(ligplaats => {
+      const lx = parseFloat(ligplaats.getAttribute('x'));
+      const ly = parseFloat(ligplaats.getAttribute('y'));
+      const lw = parseFloat(ligplaats.getAttribute('width'));
+      const lh = parseFloat(ligplaats.getAttribute('height'));
+      if (bootX >= lx && bootX <= lx + lw && bootY >= ly && bootY <= ly + lh) {
+        binnenLigplaats = true;
+      }
+    });
+
+    const wachtzone = document.getElementById('wachtzone');
+    const wx = parseFloat(wachtzone.getAttribute('x'));
+    const wy = parseFloat(wachtzone.getAttribute('y'));
+    const ww = parseFloat(wachtzone.getAttribute('width'));
+    const wh = parseFloat(wachtzone.getAttribute('height'));
+    const binnenWachtzone = (bootX >= wx && bootX <= wx + ww && bootY >= wy && bootY <= wy + wh);
+
+    if (!binnenLigplaats && !binnenWachtzone) {
+      boot.setAttribute('x', wx + 10);
+      boot.setAttribute('y', wy + 10 + (wachtzoneBootTeller * 50));
+      label.setAttribute('x', wx + 15);
+      label.setAttribute('y', wy + 30 + (wachtzoneBootTeller * 50));
+      wachtzoneBootTeller += 1;
     }
+
+    saveBoot();
   }
+}
+
+// ➡️ Opslaan bootpositie
+function saveBoot() {
+  if (!selectedBoot) return;
+  const { id, group } = selectedBoot;
+  const bootRect = group.querySelector('.boot');
+  const bootLabel = group.querySelector('text');
+  const updatedBoot = {
+    naam: bootLabel.textContent || "Boot",
+    lengte: parseFloat(bootRect.getAttribute('width')) / 5,
+    breedte: parseFloat(bootRect.getAttribute('height')) / 5,
+    eigenaar: "",
+    status: "aanwezig",
+    x: parseFloat(bootRect.getAttribute('x')),
+    y: parseFloat(bootRect.getAttribute('y')),
+    ligplaats: ""
+  };
+  database.ref('boten/' + id).set(updatedBoot);
+}
+
+// ➡️ Klik op ligplaats ➔ Boot toevoegen
+document.querySelectorAll('.ligplaats').forEach(ligplaats => {
+  ligplaats.addEventListener('click', async (e) => {
+    e.stopPropagation();
+    const naam = prompt("Naam van de boot:", "Nieuwe boot");
+    if (naam === null || naam.trim() === "") return;
+
+    const lengteInput = prompt("Lengte van de boot (meter):", "12");
+    if (lengteInput === null) return;
+
+    const breedteInput = prompt("Breedte van de boot (meter):", "4");
+    if (breedteInput === null) return;
+
+    const lengte = parseFloat(lengteInput) || 12;
+    const breedte = parseFloat(breedteInput) || 4;
+    const id = database.ref().child('boten').push().key;
+
+    const newBoot = {
+      naam: naam.trim(),
+      lengte: lengte,
+      breedte: breedte,
+      eigenaar: "",
+      status: "aanwezig",
+      x: parseFloat(ligplaats.getAttribute('x')) + 10,
+      y: parseFloat(ligplaats.getAttribute('y')) + 5,
+      ligplaats: ligplaats.id
+    };
+
+    database.ref('boten/' + id).set(newBoot, () => location.reload());
+  });
+});
+
+// 🚀 Start
+loadBoten();
