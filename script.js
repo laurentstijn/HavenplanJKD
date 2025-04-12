@@ -12,14 +12,20 @@ fetch('boten.json')
 
   // Klik ergens in de haven om een nieuwe boot toe te voegen
   svg.addEventListener('click', (e) => {
-    if (e.target.closest('.boot') || e.target.closest('.ligplaats')) return; // Niet klikken op bestaande boot of ligplaats
+    // Controle: klik je op bestaande boot, ligplaats of steiger? => geen nieuwe boot maken
+    if (
+      e.target.tagName === 'rect' &&
+      (e.target.classList.contains('steiger') || e.target.classList.contains('boot') || e.target.parentNode.classList.contains('ligplaats'))
+    ) {
+      return; // Klikte op bestaande objecten -> NIKS nieuwe boot maken
+    }
 
     const svgRect = svg.getBoundingClientRect();
     const x = e.clientX - svgRect.left;
     const y = e.clientY - svgRect.top;
 
-    const svgX = (x / svgRect.width) * 800; // 800 = jouw viewBox breedte
-    const svgY = (y / svgRect.height) * 600; // 600 = jouw viewBox hoogte
+    const svgX = (x / svgRect.width) * 800; // 800 = breedte van jouw SVG viewBox
+    const svgY = (y / svgRect.height) * 600; // 600 = hoogte van jouw SVG viewBox
 
     createNewBoot(svgX, svgY);
   });
