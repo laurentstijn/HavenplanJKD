@@ -1,4 +1,3 @@
-
 let selectedBoot = null;
 let dragging = false;
 let startX = 0;
