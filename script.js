@@ -92,6 +92,42 @@ function endDrag(e) {
   dragging = false;
   document.removeEventListener('mousemove', drag);
   document.removeEventListener('mouseup', endDrag);
+
+  if (!selectedBoot) return;
+
+  const bootRect = selectedBoot.group.querySelector('.boot');
+  const label = selectedBoot.group.querySelector('text');
+  const bootX = parseFloat(bootRect.getAttribute('x'));
+  const bootY = parseFloat(bootRect.getAttribute('y'));
+
+  // Check of de boot BINNEN een ligplaats zit
+  let binnenLigplaats = false;
+  document.querySelectorAll('.ligplaats').forEach(ligplaats => {
+    const lx = parseFloat(ligplaats.getAttribute('x'));
+    const ly = parseFloat(ligplaats.getAttribute('y'));
+    const lw = parseFloat(ligplaats.getAttribute('width'));
+    const lh = parseFloat(ligplaats.getAttribute('height'));
+    if (bootX >= lx && bootX <= lx + lw && bootY >= ly && bootY <= ly + lh) {
+      binnenLigplaats = true;
+    }
+  });
+
+  // Wachtzone parameters
+  const wachtzone = document.getElementById('wachtzone');
+  const wx = parseFloat(wachtzone.getAttribute('x'));
+  const wy = parseFloat(wachtzone.getAttribute('y'));
+  const ww = parseFloat(wachtzone.getAttribute('width'));
+  const wh = parseFloat(wachtzone.getAttribute('height'));
+
+  // Als niet binnen een ligplaats en niet binnen wachtzone, dan naar wachtzone zetten
+  if (!binnenLigplaats &&
+      !(bootX >= wx && bootX <= wx + ww && bootY >= wy && bootY <= wy + wh)) {
+    bootRect.setAttribute('x', wx + 10);
+    bootRect.setAttribute('y', wy + 10);
+    label.setAttribute('x', wx + 15);
+    label.setAttribute('y', wy + 30);
+  }
+
   saveBoot();
 }
 
