@@ -1,4 +1,3 @@
-
 let geselecteerdeLigplaats = null;
 let selectedBoot = null;
 let editBootId = null;
