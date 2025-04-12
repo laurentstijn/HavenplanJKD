@@ -24,33 +24,30 @@ function drawBoot(svg, boot, id) {
   const group = document.createElementNS('http://www.w3.org/2000/svg', 'g');
   group.setAttribute('class', 'bootgroep');
   group.setAttribute('data-id', id);
-  group.addEventListener('mousedown', startDrag); // <-- HIER: groep zelf slepen!
+  group.addEventListener('mousedown', startDrag); // Sleep de hele groep!
 
-  // Boot romp (mooie ovale vorm)
-  const ellipse = document.createElementNS('http://www.w3.org/2000/svg', 'ellipse');
-  const centerX = boot.x + 30;
-  const centerY = boot.y + 15;
-  ellipse.setAttribute('cx', centerX);
-  ellipse.setAttribute('cy', centerY);
-  ellipse.setAttribute('rx', (boot.lengte || 12) * 2);
-  ellipse.setAttribute('ry', (boot.breedte || 4) * 2);
-  ellipse.setAttribute('fill', '#d0d0d0');
-  ellipse.setAttribute('stroke', '#555');
-  ellipse.setAttribute('stroke-width', 2);
-  ellipse.classList.add('boot');
-  group.appendChild(ellipse);
+  // Boot rechthoek (zoals in het begin)
+  const rect = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
+  rect.setAttribute('x', boot.x);
+  rect.setAttribute('y', boot.y);
+  rect.setAttribute('width', (boot.lengte || 12) * 5);
+  rect.setAttribute('height', (boot.breedte || 4) * 5);
+  rect.setAttribute('fill', '#d0d0d0');
+  rect.setAttribute('stroke', '#555');
+  rect.setAttribute('stroke-width', 2);
+  rect.classList.add('boot');
+  group.appendChild(rect);
 
   // Boot naam
   const label = document.createElementNS('http://www.w3.org/2000/svg', 'text');
-  label.setAttribute('x', centerX - 20);
-  label.setAttribute('y', centerY + 25);
+  label.setAttribute('x', boot.x + 5);
+  label.setAttribute('y', boot.y + 20);
   label.setAttribute('class', 'label');
   label.textContent = boot.naam || "Boot";
   group.appendChild(label);
 
   svg.appendChild(group);
 }
-
 
 // ➡️ Boot toevoegen aan menu
 function addBootToMenu(boot, id) {
