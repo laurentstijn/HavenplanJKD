@@ -1,7 +1,7 @@
 let selectedBoot = null;
 let dragging = false;
-let hasMoved = false;  // ➡️ Nieuw: om te checken of we echt bewogen hebben
-let offsetX, offsetY;
+let startX = 0;
+let startY = 0;
 const database = firebase.database();
 
 // 🚀 Laad boten vanuit Firebase
@@ -90,7 +90,7 @@ document.querySelectorAll('.ligplaats').forEach(ligplaats => {
   });
 });
 
-// 🚚 Start slepen
+// 🚚 Start slepen van een boot
 function startDrag(e) {
   // Deselecteer alle boten
   document.querySelectorAll('.boot').forEach(boot => {
@@ -107,17 +107,90 @@ function startDrag(e) {
   };
 
   dragging = true;
-  hasMoved = false; // ➡️ Nieuw: reset bewegen
 
-  offsetX = e.offsetX;
-  offsetY = e.offsetY;
+  startX = e.clientX;  // ➡️ Beginpositie vastleggen
+  startY = e.clientY;
 
   document.addEventListener('mousemove', drag);
   document.addEventListener('mouseup', endDrag);
 }
 
-// 🚚 Sleepbeweging
+// 🚚 Sleep beweging
 function drag(e) {
   if (!dragging) return;
 
-  hasMoved = true; // ➡
+  const svg = document.getElementById('haven');
+  const pt = svg.createSVGPoint();
+  pt.x = e.clientX;
+  pt.y = e.clientY;
+  const cursorpt = pt.matrixTransform(svg.getScreenCTM().inverse());
+
+  const boot = selectedBoot.group.querySelector('.boot');
+  const label = selectedBoot.group.querySelector('text');
+
+  boot.setAttribute('x', cursorpt.x - 30);
+  boot.setAttribute('y', cursorpt.y - 10);
+  label.setAttribute('x', cursorpt.x - 25);
+  label.setAttribute('y', cursorpt.y + 5);
+}
+
+// 🚚 Stop slepen
+function endDrag(e) {
+  dragging = false;
+
+  // Bereken echte muisbeweging
+  const dx = e.clientX - startX;
+  const dy = e.clientY - startY;
+  const distance = Math.sqrt(dx * dx + dy * dy);
+
+  // Alleen opslaan als er echt gesleept is (>5 pixels)
+  if (distance > 5) {
+    saveBoot();
+  }
+
+  document.removeEventListener('mousemove', drag);
+  document.removeEventListener('mouseup', endDrag);
+}
+
+// 💾 Boot opslaan naar Firebase
+function saveBoot() {
+  if (!selectedBoot) return;
+
+  const { id, group } = selectedBoot;
+  const bootRect = group.querySelector('.boot');
+  const bootLabel = group.querySelector('text');
+
+  if (!bootRect) return;
+
+  let lengte = parseFloat(bootRect.getAttribute('width')) / 5;
+  let breedte = parseFloat(bootRect.getAttribute('height')) / 5;
+
+  if (isNaN(lengte) || lengte <= 0) lengte = 12;
+  if (isNaN(breedte) || breedte <= 0) breedte = 4;
+
+  const updatedBoot = {
+    naam: bootLabel.textContent || "Boot",
+    lengte: lengte,
+    breedte: breedte,
+    eigenaar: "",
+    status: "aanwezig",
+    x: parseFloat(bootRect.getAttribute('x')),
+    y: parseFloat(bootRect.getAttribute('y')),
+    ligplaats: group.getAttribute('data-ligplaats')
+  };
+
+  database.ref('boten/' + id).set(updatedBoot);
+}
+
+// 🛥️ Boot verwijderen
+function deleteBoot() {
+  if (!selectedBoot) return;
+  const { id, group } = selectedBoot;
+
+  database.ref('boten/' + id).remove();
+  group.parentNode.removeChild(group);
+  selectedBoot = null;
+}
+
+// 🚀 Start: laad alle boten
+loadBoten();
