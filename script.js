@@ -57,7 +57,7 @@ function loadBoten() {
       });
     }
   });
-}
+
 
 
 function loadBoten() {
