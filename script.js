@@ -3,7 +3,7 @@ let dragging = false;
 let wachtzoneBootTeller = 0;
 const database = firebase.database();
 
-// Boot laden
+// ➔ Boten laden
 function loadBoten() {
   const svg = document.getElementById('haven');
   const lijst = document.getElementById('botenLijst');
@@ -19,11 +19,12 @@ function loadBoten() {
   });
 }
 
-// Teken boot
+// ➔ Boot tekenen in de haven
 function drawBoot(svg, boot, id) {
   const group = document.createElementNS('http://www.w3.org/2000/svg', 'g');
   group.setAttribute('class', 'bootgroep');
   group.setAttribute('data-id', id);
+
   const rect = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
   rect.setAttribute('x', boot.x);
   rect.setAttribute('y', boot.y);
@@ -44,7 +45,7 @@ function drawBoot(svg, boot, id) {
   svg.appendChild(group);
 }
 
-// Voeg boot toe aan menu
+// ➔ Boot toevoegen aan menu
 function addBootToMenu(boot, id) {
   const lijst = document.getElementById('botenLijst');
   const div = document.createElement('div');
@@ -57,7 +58,7 @@ function addBootToMenu(boot, id) {
   lijst.appendChild(div);
 }
 
-// Bewerken
+// ➔ Boot bewerken
 function editBoot(id) {
   database.ref('boten/' + id).once('value').then(snapshot => {
     const boot = snapshot.val();
@@ -80,14 +81,14 @@ function editBoot(id) {
   });
 }
 
-// Verwijderen
+// ➔ Boot verwijderen
 function deleteBoot(id) {
   if (confirm("Weet je zeker dat je deze boot wilt verwijderen?")) {
     database.ref('boten/' + id).remove(() => location.reload());
   }
 }
 
-// Drag functies
+// ➔ Sleep acties
 function startDrag(e) {
   document.querySelectorAll('.boot').forEach(b => b.classList.remove('selected'));
   e.target.classList.add('selected');
@@ -119,45 +120,4 @@ function endDrag(e) {
   document.removeEventListener('mouseup', endDrag);
 }
 
-// Klik op ligplaatsen om nieuwe boten toe te voegen
-document.querySelectorAll('.ligplaats').forEach(ligplaats => {
-  ligplaats.addEventListener('click', async (e) => {
-    e.stopPropagation();
-    const ligplaatsId = ligplaats.getAttribute('id');
-
-    const existingBoot = document.querySelector(`[data-ligplaats="${ligplaatsId}"]`);
-    if (existingBoot) {
-      alert('Deze ligplaats is al bezet!');
-      return;
-    }
-
-    const naam = prompt("Naam van de boot:", "Nieuwe boot");
-    if (naam === null || naam.trim() === "") return;
-
-    const lengteInput = prompt("Lengte van de boot (meter):", "12");
-    if (lengteInput === null) return;
-
-    const breedteInput = prompt("Breedte van de boot (meter):", "4");
-    if (breedteInput === null) return;
-
-    const lengte = parseFloat(lengteInput) || 12;
-    const breedte = parseFloat(breedteInput) || 4;
-    const id = database.ref().child('boten').push().key;
-
-    const newBoot = {
-      naam: naam.trim(),
-      lengte: lengte,
-      breedte: breedte,
-      eigenaar: "",
-      status: "aanwezig",
-      x: parseFloat(ligplaats.getAttribute('x')) + 10,
-      y: parseFloat(ligplaats.getAttribute('y')) + 5,
-      ligplaats: ligplaatsId
-    };
-
-    database.ref('boten/' + id).set(newBoot, () => location.reload());
-  });
-});
-
-
-loadBoten();
+// ➔ Boten toevoegen bij
