@@ -4,7 +4,7 @@ let editBootId = null;
 let dragging = false;
 let startX, startY;
 const database = firebase.database();
-const schaalFactor = 3;
+const schaalFactor = 5;
 
 // Haven tekenen
 function tekenBasisHaven() {
