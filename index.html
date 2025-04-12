@@ -27,13 +27,30 @@
       height: 100%;
     }
     .steiger { fill: #c2b8a3; }
-    .ligplaats { fill: #a3c2c2; stroke: #333; stroke-width: 1; cursor: pointer; }
+    .ligplaats { fill: rgba(163, 194, 194, 0.4); stroke: #333; stroke-width: 1; cursor: pointer; }
     .wachtzone { fill: #d0e8ff; stroke: #00aaff; stroke-width: 2; opacity: 0.5; }
-    .boot { fill: #e0e0e0; stroke: #555; stroke-width: 1; cursor: move; }
-    .boot.selected { stroke: orange; stroke-width: 3; }
+    .boot { fill: #d0d0d0; stroke: #555; stroke-width: 2; }
     .label { font-size: 12px; fill: #333; pointer-events: none; }
     .boot-item { margin-bottom: 10px; }
     .boot-item button { margin-left: 5px; }
+
+    /* Popup stijl */
+    #popup {
+      display: none;
+      position: fixed;
+      top: 30%;
+      left: 40%;
+      background: white;
+      padding: 20px;
+      border: 2px solid #333;
+      box-shadow: 0px 0px 10px rgba(0,0,0,0.5);
+      z-index: 10;
+    }
+    #popup input {
+      width: 100%;
+      margin-top: 5px;
+      margin-bottom: 10px;
+    }
   </style>
 </head>
 <body>
@@ -41,28 +58,22 @@
 <!-- SVG Haven -->
 <div id="haven-container">
   <svg id="haven" viewBox="0 0 1000 600">
+    <!-- Steigers -->
     <rect class="steiger" x="50" y="100" width="500" height="30" /> <!-- hoofdsteiger -->
     <rect class="steiger" x="160" y="130" width="30" height="300" />
     <rect class="steiger" x="300" y="130" width="30" height="300" />
-    <rect class="ligplaats" id="ligplaats1" x="40" y="150" width="120" height="30" />
-    <rect class="ligplaats" id="ligplaats2" x="40" y="200" width="120" height="30" />
-    <rect class="ligplaats" id="ligplaats3" x="40" y="250" width="120" height="30" />
-    <rect class="ligplaats" id="ligplaats4" x="250" y="150" width="120" height="30" />
-    <rect class="ligplaats" id="ligplaats5" x="250" y="200" width="120" height="30" />
-    <rect class="ligplaats" id="ligplaats6" x="250" y="250" width="120" height="30" />
+
+    <!-- Ligplaatsen -->
+    <rect class="ligplaats" id="ligplaats1" x="80" y="140" width="100" height="30" />
+    <rect class="ligplaats" id="ligplaats2" x="80" y="190" width="100" height="30" />
+    <rect class="ligplaats" id="ligplaats3" x="80" y="240" width="100" height="30" />
+    <rect class="ligplaats" id="ligplaats4" x="280" y="140" width="100" height="30" />
+    <rect class="ligplaats" id="ligplaats5" x="280" y="190" width="100" height="30" />
+    <rect class="ligplaats" id="ligplaats6" x="280" y="240" width="100" height="30" />
+
+    <!-- Wachtzone -->
     <rect id="wachtzone" class="wachtzone" x="700" y="50" width="150" height="500" />
   </svg>
-</div>
-  
-<!-- Popup Modal -->
-<div id="popup" style="display:none; position:fixed; top:30%; left:40%; background:white; padding:20px; border:2px solid #333; box-shadow: 0px 0px 10px rgba(0,0,0,0.5); z-index: 10;">
-  <h3>Nieuwe boot toevoegen</h3>
-  <label>Naam: <input type="text" id="bootNaam"></label><br><br>
-  <label>Lengte (m): <input type="number" id="bootLengte" value="12"></label><br><br>
-  <label>Breedte (m): <input type="number" id="bootBreedte" value="4"></label><br><br>
-  <label>Eigenaar: <input type="text" id="bootEigenaar"></label><br><br>
-  <button onclick="bevestigBoot()">Opslaan</button>
-  <button onclick="annuleerBoot()">Annuleren</button>
 </div>
 
 <!-- Menu -->
@@ -71,18 +82,34 @@
   <div id="botenLijst"></div>
 </div>
 
-<!-- Firebase SDK -->
+<!-- Popup Modal -->
+<div id="popup">
+  <h3>Nieuwe boot toevoegen</h3>
+  <label>Naam:</label>
+  <input type="text" id="bootNaam"><br>
+  <label>Lengte (m):</label>
+  <input type="number" id="bootLengte" value="12"><br>
+  <label>Breedte (m):</label>
+  <input type="number" id="bootBreedte" value="4"><br>
+  <label>Eigenaar:</label>
+  <input type="text" id="bootEigenaar"><br>
+  <button onclick="bevestigBoot()">Opslaan</button>
+  <button onclick="annuleerBoot()">Annuleren</button>
+</div>
+
+<!-- Firebase -->
 <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-database-compat.js"></script>
+
 <script>
 const firebaseConfig = {
-  apiKey: "AIzaSyD1KyhwzPqFHnXt2S1OCaWGVYXUde6mj-8",
-  authDomain: "havenplan-jkd.firebaseapp.com",
-  databaseURL: "https://havenplan-jkd-default-rtdb.europe-west1.firebasedatabase.app",
-  projectId: "havenplan-jkd",
-  storageBucket: "havenplan-jkd.firebasestorage.app",
-  messagingSenderId: "126216147433",
-  appId: "1:126216147433:web:f23132c7c4db395368bb78"
+  apiKey: "JOUW_API_KEY",
+  authDomain: "JOUW_PROJECT_ID.firebaseapp.com",
+  databaseURL: "https://JOUW_PROJECT_ID.europe-west1.firebasedatabase.app",
+  projectId: "JOUW_PROJECT_ID",
+  storageBucket: "JOUW_PROJECT_ID.appspot.com",
+  messagingSenderId: "JOUW_SENDER_ID",
+  appId: "JOUW_APP_ID"
 };
 firebase.initializeApp(firebaseConfig);
 </script>
