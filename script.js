@@ -1,4 +1,3 @@
-
 let geselecteerdeLigplaats = null;
 let selectedBoot = null;
 let editBootId = null;
@@ -102,6 +101,53 @@ function endDrag(e) {
   document.removeEventListener('mouseup', endDrag);
 
   if (!selectedBoot) return;
+
+  const bootRect = selectedBoot.group.querySelector('.boot');
+  const label = selectedBoot.group.querySelector('text');
+  const bootX = parseFloat(bootRect.getAttribute('x'));
+  const bootY = parseFloat(bootRect.getAttribute('y'));
+
+  let binnenLigplaats = false;
+  document.querySelectorAll('.ligplaats').forEach(ligplaats => {
+    const lx = parseFloat(ligplaats.getAttribute('x'));
+    const ly = parseFloat(ligplaats.getAttribute('y'));
+    const lw = parseFloat(ligplaats.getAttribute('width'));
+    const lh = parseFloat(ligplaats.getAttribute('height'));
+    if (bootX >= lx && bootX <= lx + lw && bootY >= ly && bootY <= ly + lh) {
+      binnenLigplaats = true;
+    }
+  });
+
+  const wachtzone = document.getElementById('wachtzone');
+  const wx = parseFloat(wachtzone.getAttribute('x'));
+  const wy = parseFloat(wachtzone.getAttribute('y'));
+  const ww = parseFloat(wachtzone.getAttribute('width'));
+  const wh = parseFloat(wachtzone.getAttribute('height'));
+
+  if (!binnenLigplaats &&
+      !(bootX >= wx && bootX <= wx + ww && bootY >= wy && bootY <= wy + wh)) {
+
+    // Tel hoeveel boten al in de wachtzone zitten
+    let count = 0;
+    document.querySelectorAll('.boot').forEach(b => {
+      const bx = parseFloat(b.getAttribute('x'));
+      const by = parseFloat(b.getAttribute('y'));
+      if (bx >= wx && bx <= wx + ww && by >= wy && by <= wy + wh) {
+        count++;
+      }
+    });
+
+    // Bereken nieuwe positie
+    const spacing = 40; // afstand tussen boten
+    const newX = wx + 10;
+    const newY = wy + 10 + count * spacing;
+
+    bootRect.setAttribute('x', newX);
+    bootRect.setAttribute('y', newY);
+    label.setAttribute('x', newX + 5);
+    label.setAttribute('y', newY + 20);
+  }
+
   saveBoot();
 }
 
@@ -186,23 +232,6 @@ function bevestigBoot() {
         document.getElementById('popup').style.display = 'none';
         loadBoten();
       });
-    });
-  } else if (geselecteerdeLigplaats) {
-    // Nieuwe boot toevoegen
-    const id = database.ref().child('boten').push().key;
-    const newBoot = {
-      naam: naam,
-      lengte: lengte,
-      breedte: breedte,
-      eigenaar: eigenaar,
-      status: "aanwezig",
-      x: parseFloat(geselecteerdeLigplaats.getAttribute('x')) + 10,
-      y: parseFloat(geselecteerdeLigplaats.getAttribute('y')) + 5,
-      ligplaats: geselecteerdeLigplaats.id
-    };
-    database.ref('boten/' + id).set(newBoot, () => {
-      document.getElementById('popup').style.display = 'none';
-      loadBoten();
     });
   }
 }
