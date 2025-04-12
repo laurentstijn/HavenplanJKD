@@ -47,18 +47,18 @@ function drawBoot(svg, boot, id) {
   svg.appendChild(group);
 }
 
-// Boot in menu
+// Boot in lijst tonen
 function addBootToMenu(boot, id) {
   const lijst = document.getElementById('botenLijst');
   const div = document.createElement('div');
   div.className = 'boot-item';
-  div.innerHTML = `<strong>${boot.naam}</strong> (${boot.eigenaar})
+  div.innerHTML = `<strong>${boot.naam}</strong> (${boot.eigenaar || "Geen eigenaar"})
     <button onclick="editBoot('${id}')">✏️</button>
     <button onclick="deleteBoot('${id}')">🗑️</button>`;
   lijst.appendChild(div);
 }
 
-// Slepen
+// Slepen starten
 function startDrag(e) {
   document.querySelectorAll('.boot').forEach(b => b.classList.remove('selected'));
   e.target.classList.add('selected');
@@ -71,6 +71,7 @@ function startDrag(e) {
   document.addEventListener('mouseup', endDrag);
 }
 
+// Tijdens slepen
 function drag(e) {
   if (!selectedBoot) return;
   const svg = document.getElementById('haven');
@@ -86,6 +87,7 @@ function drag(e) {
   label.setAttribute('y', cursorpt.y + 5);
 }
 
+// Slepen stoppen
 function endDrag(e) {
   dragging = false;
   document.removeEventListener('mousemove', drag);
@@ -93,6 +95,7 @@ function endDrag(e) {
   saveBoot();
 }
 
+// Boot opslaan
 function saveBoot() {
   if (!selectedBoot) return;
   const { id, group } = selectedBoot;
@@ -111,7 +114,44 @@ function saveBoot() {
   database.ref('boten/' + id).set(updatedBoot);
 }
 
-// Popup functies
+// Boot aanpassen
+function editBoot(id) {
+  database.ref('boten/' + id).once('value').then(snapshot => {
+    const boot = snapshot.val();
+    if (!boot) return;
+
+    const nieuweNaam = prompt("Nieuwe naam:", boot.naam);
+    if (nieuweNaam === null) return;
+
+    const nieuweLengte = prompt("Nieuwe lengte (meter):", boot.lengte);
+    if (nieuweLengte === null) return;
+
+    const nieuweBreedte = prompt("Nieuwe breedte (meter):", boot.breedte);
+    if (nieuweBreedte === null) return;
+
+    const nieuweEigenaar = prompt("Nieuwe eigenaar:", boot.eigenaar || "");
+    if (nieuweEigenaar === null) return;
+
+    const updatedBoot = {
+      ...boot,
+      naam: nieuweNaam.trim(),
+      lengte: parseFloat(nieuweLengte),
+      breedte: parseFloat(nieuweBreedte),
+      eigenaar: nieuweEigenaar.trim()
+    };
+
+    database.ref('boten/' + id).set(updatedBoot, () => location.reload());
+  });
+}
+
+// Boot verwijderen
+function deleteBoot(id) {
+  if (confirm("Weet je zeker dat je deze boot wilt verwijderen?")) {
+    database.ref('boten/' + id).remove(() => location.reload());
+  }
+}
+
+// Popup opslaan
 function bevestigBoot() {
   const naam = document.getElementById('bootNaam').value.trim();
   const lengte = parseFloat(document.getElementById('bootLengte').value) || 12;
@@ -139,11 +179,12 @@ function bevestigBoot() {
   database.ref('boten/' + id).set(newBoot, () => location.reload());
 }
 
+// Popup annuleren
 function annuleerBoot() {
   document.getElementById('popup').style.display = 'none';
 }
 
-// Ligplaats aanklikken
+// Ligplaatsen klikbaar maken
 document.querySelectorAll('.ligplaats').forEach(ligplaats => {
   ligplaats.addEventListener('click', (e) => {
     e.stopPropagation();
