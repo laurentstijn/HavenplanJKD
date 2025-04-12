@@ -1,3 +1,4 @@
+let startX, startY;
 let editBootId = null;  // weten of we nieuwe boot maken of bestaande bewerken
 let geselecteerdeLigplaats = null;
 let selectedBoot = null;
@@ -68,27 +69,17 @@ function startDrag(e) {
     id: e.target.parentNode.getAttribute('data-id')
   };
 
-  if (!dragging) { // klik zonder slepen = popup openen
-    database.ref('boten/' + selectedBoot.id).once('value').then(snapshot => {
-      const boot = snapshot.val();
-      if (!boot) return;
+  startX = e.clientX;
+  startY = e.clientY;
+  dragging = true;
 
-      geselecteerdeLigplaats = null; // omdat we een bestaande bewerken
-      editBootId = selectedBoot.id;  // bestaande boot
-      document.getElementById('popupTitel').textContent = "Boot aanpassen";
-      document.getElementById('bootNaam').value = boot.naam;
-      document.getElementById('bootLengte').value = boot.lengte;
-      document.getElementById('bootBreedte').value = boot.breedte;
-      document.getElementById('bootEigenaar').value = boot.eigenaar;
-      document.getElementById('popup').style.display = 'block';
-    });
-  }
-
+  document.addEventListener('mousemove', drag);
+  document.addEventListener('mouseup', endDrag);
+}
   dragging = true;
   document.addEventListener('mousemove', drag);
   document.addEventListener('mouseup', endDrag);
 }
-
 
 // Tijdens slepen
 function drag(e) {
@@ -114,40 +105,30 @@ function endDrag(e) {
 
   if (!selectedBoot) return;
 
-  const bootRect = selectedBoot.group.querySelector('.boot');
-  const label = selectedBoot.group.querySelector('text');
-  const bootX = parseFloat(bootRect.getAttribute('x'));
-  const bootY = parseFloat(bootRect.getAttribute('y'));
+  // Bereken afstand van muisbeweging
+  const dx = e.clientX - startX;
+  const dy = e.clientY - startY;
+  const distance = Math.sqrt(dx * dx + dy * dy);
 
-  // Check of de boot BINNEN een ligplaats zit
-  let binnenLigplaats = false;
-  document.querySelectorAll('.ligplaats').forEach(ligplaats => {
-    const lx = parseFloat(ligplaats.getAttribute('x'));
-    const ly = parseFloat(ligplaats.getAttribute('y'));
-    const lw = parseFloat(ligplaats.getAttribute('width'));
-    const lh = parseFloat(ligplaats.getAttribute('height'));
-    if (bootX >= lx && bootX <= lx + lw && bootY >= ly && bootY <= ly + lh) {
-      binnenLigplaats = true;
-    }
-  });
+  if (distance < 5) {
+    // ➔ Bijna niet bewogen: gewoon klik (open popup)
+    database.ref('boten/' + selectedBoot.id).once('value').then(snapshot => {
+      const boot = snapshot.val();
+      if (!boot) return;
 
-  // Wachtzone parameters
-  const wachtzone = document.getElementById('wachtzone');
-  const wx = parseFloat(wachtzone.getAttribute('x'));
-  const wy = parseFloat(wachtzone.getAttribute('y'));
-  const ww = parseFloat(wachtzone.getAttribute('width'));
-  const wh = parseFloat(wachtzone.getAttribute('height'));
-
-  // Als niet binnen een ligplaats en niet binnen wachtzone, dan naar wachtzone zetten
-  if (!binnenLigplaats &&
-      !(bootX >= wx && bootX <= wx + ww && bootY >= wy && bootY <= wy + wh)) {
-    bootRect.setAttribute('x', wx + 10);
-    bootRect.setAttribute('y', wy + 10);
-    label.setAttribute('x', wx + 15);
-    label.setAttribute('y', wy + 30);
+      geselecteerdeLigplaats = null;
+      editBootId = selectedBoot.id;
+      document.getElementById('popupTitel').textContent = "Boot aanpassen";
+      document.getElementById('bootNaam').value = boot.naam;
+      document.getElementById('bootLengte').value = boot.lengte;
+      document.getElementById('bootBreedte').value = boot.breedte;
+      document.getElementById('bootEigenaar').value = boot.eigenaar || "";
+      document.getElementById('popup').style.display = 'block';
+    });
+  } else {
+    // ➔ Wel bewogen: echte sleepactie
+    saveBoot();
   }
-
-  saveBoot();
 }
 
 // Boot opslaan
