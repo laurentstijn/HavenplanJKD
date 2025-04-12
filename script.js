@@ -4,7 +4,7 @@ let editBootId = null;
 let dragging = false;
 let startX, startY;
 const database = firebase.database();
-const schaalFactor = 5;
+const schaalFactor = 3;
 
 // Haven tekenen
 function tekenBasisHaven() {
@@ -39,6 +39,15 @@ function tekenBasisHaven() {
     rect.setAttribute('x', i < 15 ? 20 : 430);
     rect.setAttribute('y', 140 + (i % 15) * 35);
     svg.appendChild(rect);
+
+    // Ligplaats-nummer toevoegen in ligplaats
+    const label = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+    label.setAttribute('x', parseFloat(rect.getAttribute('x')) + 10);
+    label.setAttribute('y', parseFloat(rect.getAttribute('y')) + 20);
+    label.setAttribute('class', 'label');
+    label.setAttribute('text-anchor', 'start');
+    label.textContent = `L${i + 1}`;
+    svg.appendChild(label);
   }
 
   // Wachtzone
@@ -51,7 +60,7 @@ function tekenBasisHaven() {
   wachtzone.setAttribute('height', 500);
   svg.appendChild(wachtzone);
 
-  // Ligplaatsen klikbaar
+  // Ligplaatsen klikbaar maken
   document.querySelectorAll('.ligplaats').forEach(ligplaats => {
     ligplaats.addEventListener('click', (e) => {
       e.stopPropagation();
@@ -202,9 +211,6 @@ function endDrag(e) {
   const wh = parseFloat(wachtzone.getAttribute('height'));
 
   if (!binnenLigplaats && !(bootX >= wx && bootX <= wx + ww && bootY >= wy && bootY <= wy + wh)) {
-    // Boot buiten alles ➔ Zet hem in wachtzone
-
-    // Tel hoeveel boten al in wachtzone staan
     let count = 0;
     document.querySelectorAll('.boot').forEach(b => {
       const bx = parseFloat(b.getAttribute('x'));
@@ -214,15 +220,14 @@ function endDrag(e) {
       }
     });
 
-    // Zet nieuwe positie in wachtzone
-    const spacing = 30; // afstand tussen boten
+    const spacing = 30;
     const newX = wx + 10;
     const newY = wy + 10 + count * spacing;
 
     bootRect.setAttribute('x', newX);
     bootRect.setAttribute('y', newY);
     label.setAttribute('x', newX + 5);
-    label.setAttribute('y', newY + 15);
+    label.setAttribute('y', newY + 20);
   }
 
   saveBoot();
@@ -254,7 +259,7 @@ function saveBoot() {
   });
 }
 
-// Boot bewerken vanuit menu of klik
+// Boot aanpassen vanuit menu of klik
 function editBoot(id) {
   database.ref('boten/' + id).once('value').then(snapshot => {
     const boot = snapshot.val();
