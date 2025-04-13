@@ -46,11 +46,12 @@ function loadBoten() {
   });
 }
 
-// Functie om ligplaatsen klikbaar te maken
+// Zorg ervoor dat de ligplaatsen klikbaar zijn voor het toevoegen van een nieuwe boot
 document.querySelectorAll('.ligplaats').forEach(ligplaats => {
   ligplaats.addEventListener('click', function(e) {
-    e.stopPropagation(); // Voorkom dat andere elementen reageren op de klik
-    openPopupNew(ligplaats); // Open de popup voor een nieuwe boot
+    e.stopPropagation(); // Voorkom andere acties zoals selectie van tekst
+    selectedLigplaats = ligplaats;  // Stel de geselecteerde ligplaats in
+    openPopupNew();  // Open de popup voor een nieuwe boot
   });
 });
 
@@ -323,6 +324,7 @@ function deleteBoot(id) {
     });
   }
 }
+
 // Functie voor het opslaan van een nieuwe boot
 function bevestigBoot() {
   const naam = document.getElementById('bootNaam').value.trim();
