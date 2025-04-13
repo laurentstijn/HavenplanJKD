@@ -35,13 +35,13 @@ function drawBoot(svg, boot, id) {
   group.setAttribute('class', 'bootgroep');
   group.setAttribute('data-id', id);
   group.addEventListener('mousedown', startDrag);
-  group.addEventListener('touchstart', startDrag);  // Touch-event voor mobiel
+  group.addEventListener('touchstart', startDrag);  // Voor touch-apparaten
 
   const rect = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
   rect.setAttribute('x', boot.x);
   rect.setAttribute('y', boot.y);
-  rect.setAttribute('width', (boot.lengte || 12) * 5);
-  rect.setAttribute('height', (boot.breedte || 4) * 5);
+  rect.setAttribute('width', (boot.lengte || 12) * 5);  // Verhoog de schaal als nodig
+  rect.setAttribute('height', (boot.breedte || 4) * 5);  // Verhoog de schaal als nodig
   rect.setAttribute('fill', '#d0d0d0');
   rect.setAttribute('stroke', '#555');
   rect.setAttribute('stroke-width', 2);
