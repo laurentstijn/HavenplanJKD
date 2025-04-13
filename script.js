@@ -70,18 +70,19 @@ function startDrag(e) {
     id: e.target.parentNode.getAttribute('data-id')
   };
 
-  // Houd de offset tussen de muis en de boot bij
+  // Sla de offset op tussen de muis en de boot bij de start van het slepen
   const rect = selectedBoot.group.querySelector('.boot');
-  const offsetX = e.clientX - rect.getBoundingClientRect().left;
-  const offsetY = e.clientY - rect.getBoundingClientRect().top;
+  const bootX = rect.getAttribute('x');
+  const bootY = rect.getAttribute('y');
+  const offsetX = e.clientX - bootX;
+  const offsetY = e.clientY - bootY;
 
+  // Sla de muis- en offset-waarden op voor het slepen
+  selectedBoot.offsetX = offsetX;
+  selectedBoot.offsetY = offsetY;
   startX = e.clientX;
   startY = e.clientY;
   dragging = true;
-
-  // Sla de offsets op in selectedBoot zodat we deze later kunnen gebruiken
-  selectedBoot.offsetX = offsetX;
-  selectedBoot.offsetY = offsetY;
 
   // Start de slepen-beweging
   document.addEventListener('mousemove', drag);
@@ -91,22 +92,22 @@ function startDrag(e) {
 // Tijdens slepen
 function drag(e) {
   if (!selectedBoot) return;
-  
+
   const svg = document.getElementById('haven');
-  
-  // Bereken de nieuwe positie op basis van de muispositie
   const pt = svg.createSVGPoint();
   pt.x = e.clientX;
   pt.y = e.clientY;
+
+  // Transformeer de muispositie naar SVG-coördinaten
   const cursorpt = pt.matrixTransform(svg.getScreenCTM().inverse());
 
-  // Pas de positie van de boot en het label aan zodat deze de muis volgt
-  const boot = selectedBoot.group.querySelector('.boot');
-  const label = selectedBoot.group.querySelector('text');
-  
+  // Bereken de nieuwe positie van de boot, rekening houdend met de offset
   const newX = cursorpt.x - selectedBoot.offsetX;
   const newY = cursorpt.y - selectedBoot.offsetY;
 
+  // Pas de boot- en labelpositie aan
+  const boot = selectedBoot.group.querySelector('.boot');
+  const label = selectedBoot.group.querySelector('text');
   boot.setAttribute('x', newX);
   boot.setAttribute('y', newY);
   label.setAttribute('x', newX + 5);
@@ -191,8 +192,6 @@ function endDrag(e) {
     saveBoot();
   }
 }
-
-
 
 // Boot opslaan
 function saveBoot() {
