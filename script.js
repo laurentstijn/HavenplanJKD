@@ -43,7 +43,6 @@ function loadBoten() {
   });
 }
 
-
 // Boot tekenen
 function drawBoot(svg, boot, id) {
   const group = document.createElementNS('http://www.w3.org/2000/svg', 'g');
