@@ -81,7 +81,7 @@ window.addEventListener('resize', updateWachtzonePosition); // Zorg ervoor dat d
 function updateWachtzonePosition() {
   const havenContainer = document.getElementById('haven-container'); // Verkrijg de breedte van de haven-container
   const containerWidth = havenContainer.clientWidth; // Breedte van de haven-container
-  const percentageFromRight = 10; // Stel hier het percentage vanaf de rechterkant in (bijvoorbeeld 10%)
+  const percentageFromRight = 30; // Stel hier het percentage vanaf de rechterkant in (bijvoorbeeld 10%)
 
   // Bereken de nieuwe `x`-waarde van de wachtzone
   const newX = containerWidth * (1 - percentageFromRight / 100) - 150; // De breedte van de wachtzone is 150px
