@@ -1,15 +1,10 @@
+/* Zorg ervoor dat de layout-container de elementen netjes naast elkaar plaatst */
 body {
   margin: 0;
   font-family: sans-serif;
   background: #eef2f7;
-  display: flex;
-  height: 100vh;
-  overflow: hidden;
-}
-
-#haven-container {
-  flex: 3;
-  background: #dbe9f4;
+  display: flex; /* Flexbox voor het positioneren van de container */
+  height: 100vh; /* Zorg ervoor dat het de volledige hoogte van het scherm neemt */
 }
 
 #menu {
@@ -37,14 +32,6 @@ svg {
   stroke: #333;
   stroke-width: 1;
   cursor: pointer;
-}
-
-/* Wachtzone - Zorg ervoor dat de CSS alleen styling regelt */
-.wachtzone {
-  fill: #d0e8ff;
-  stroke: #00aaff;
-  stroke-width: 2;
-  opacity: 0.5;
 }
 
 /* Boten */
@@ -102,6 +89,28 @@ svg {
 .popup-buttons button {
   width: 48%;
 }
+
+
+
+#layout-container {
+  display: flex; /* Flexbox-container voor het plaatsen van de haven en wachtzone naast elkaar */
+  height: 100%;
+  width: 100%;
+}
+
+#haven-container {
+  flex: 3; /* Dit zorgt ervoor dat de haven-container 3 delen van de beschikbare ruimte krijgt */
+  background: #dbe9f4;
+  padding: 20px;
+}
+
+#wachtzone {
+  flex: 0 0 150px; /* Wachtzone krijgt een vaste breedte van 150px */
+  height: 500px;
+  background-color: #f0f0f0; /* Achtergrondkleur voor de wachtzone */
+  margin-left: 10px; /* Zorg ervoor dat de wachtzone niet direct tegen de haven aan staat */
+}
+
 
 /*#haven {
   transform: scale(0.5); /* Verklein de inhoud van de SVG met 50% */
