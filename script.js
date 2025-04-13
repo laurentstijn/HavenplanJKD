@@ -3,6 +3,21 @@ let selectedBoot = null;
 let dragging = false;
 let startX, startY;
 
+// Firebase configuratie (gebruik je eigen configuratie)
+const firebaseConfig = {
+  apiKey: "AIzaSyD1KyhwzPqFHnXt2S1OCaWGVYXUde6mj-8",
+  authDomain: "havenplan-jkd.firebaseapp.com",
+  databaseURL: "https://havenplan-jkd-default-rtdb.europe-west1.firebasedatabase.app",
+  projectId: "havenplan-jkd",
+  storageBucket: "havenplan-jkd.firebasestorage.app",
+  messagingSenderId: "126216147433",
+  appId: "1:126216147433:web:f23132c7c4db395368bb78"
+};
+firebase.initializeApp(firebaseConfig);
+// Verkrijg toegang tot de database
+const database = firebase.database();
+
+
 // Boten laden
 function loadBoten() {
   const svg = document.getElementById('haven');
