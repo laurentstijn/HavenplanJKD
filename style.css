@@ -13,8 +13,8 @@ body {
 }
 
 #menu {
-  width: 10%;
-  flex: 0 0 auto;
+  witdh: 10%;
+  flex: 1;
   background: white;
   padding: 20px;
   overflow-y: auto;
@@ -24,11 +24,6 @@ body {
 svg {
   width: 100%;
   height: 100%;
-}
-
-#haven {
-  transform: scale(0.5); /* Verklein de inhoud van de SVG met 50% */
-  transform-origin: 0 0; /* Zorg ervoor dat de schaal begint vanaf de linkerbovenhoek */
 }
 
 /* Steigers */
@@ -106,4 +101,8 @@ svg {
 
 .popup-buttons button {
   width: 48%;
+}
+#haven {
+  transform: scale(0.5); /* Verklein de inhoud van de SVG met 50% */
+  transform-origin: 0 0; /* Zorg ervoor dat de schaal begint vanaf de linkerbovenhoek */
 }
