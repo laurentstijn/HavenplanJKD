@@ -67,10 +67,31 @@ const firebaseConfig = {
   appId: "1:126216147433:web:f23132c7c4db395368bb78"
 };
 firebase.initializeApp(firebaseConfig);
+
+  
 </script>
 
 <!-- Eigen Script -->
 <script src="script.js"></script>
 
+  <!-- JavaScript -->
+  <script>
+    window.addEventListener('resize', updateWachtzonePosition); // Zorg ervoor dat de positie opnieuw wordt berekend bij het aanpassen van het scherm
+
+    function updateWachtzonePosition() {
+      const containerWidth = document.body.clientWidth; // Verkrijg de breedte van de container (je kunt dit ook aanpassen naar een specifiek container-element)
+      const percentageFromRight = 10; // Stel hier het percentage vanaf de rechterkant in (bijvoorbeeld 10%)
+
+      // Bereken de nieuwe `x`-waarde van de wachtzone
+      const newX = containerWidth * (1 - percentageFromRight / 100) - 150; // De breedte van de wachtzone is 150px
+
+      // Update de `x`-positie van de wachtzone
+      const wachtzone = document.getElementById('wachtzone');
+      wachtzone.setAttribute('x', newX);
+    }
+
+    // Roep de functie aan bij het laden van de pagina om de startpositie in te stellen
+    updateWachtzonePosition();
+  </script>
 </body>
 </html>
