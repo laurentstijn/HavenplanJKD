@@ -117,7 +117,7 @@ function endDrag(e) {
       document.getElementById('bootNaam').value = boot.naam;
       document.getElementById('bootLengte').value = boot.lengte;
       document.getElementById('bootBreedte').value = boot.breedte;
-      document.getElementById('bootEigenaar').value = boot.eigenaar || "";
+      document.getElementById('bootEigenaar').value = boot.eigenaar;
       document.getElementById('popup').style.display = 'block';
     });
   } else {
@@ -225,8 +225,8 @@ function deleteBoot(id) {
 // Popup bevestigen
 function bevestigBoot() {
   const naam = document.getElementById('bootNaam').value.trim();
-  const lengte = parseFloat(document.getElementById('bootLengte').value) || 12;
-  const breedte = parseFloat(document.getElementById('bootBreedte').value) || 4;
+  const lengte = parseFloat(document.getElementById('bootLengte').value.trim();
+  const breedte = parseFloat(document.getElementById('bootBreedte').value.trim();
   const eigenaar = document.getElementById('bootEigenaar').value.trim();
 
   if (!naam) {
@@ -277,8 +277,8 @@ document.querySelectorAll('.ligplaats').forEach(ligplaats => {
     editBootId = null;
     document.getElementById('popupTitel').textContent = "Nieuwe boot toevoegen";
     document.getElementById('bootNaam').value = "";
-    document.getElementById('bootLengte').value = 12;
-    document.getElementById('bootBreedte').value = 4;
+    document.getElementById('bootLengte').value = "";
+    document.getElementById('bootBreedte').value = "";
     document.getElementById('bootEigenaar').value = "";
     document.getElementById('popup').style.display = 'block';
   });
