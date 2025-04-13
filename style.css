@@ -13,6 +13,7 @@ body {
 }
 
 #menu {
+  witdh: 250px;
   flex: 1;
   background: white;
   padding: 20px;
