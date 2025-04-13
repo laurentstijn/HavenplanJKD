@@ -40,7 +40,12 @@ svg {
 }
 
 /* Wachtzone */
-.wachtzone {
+#wachtzone {
+  position: absolute; /* Zorgt ervoor dat de wachtzone relatief is aan de container */
+  right: 10%; /* Plaats de wachtzone 10% van de rechterkant */
+  top: 50px;
+  width: 150px;
+  height: 500px;
   fill: #d0e8ff;
   stroke: #00aaff;
   stroke-width: 2;
