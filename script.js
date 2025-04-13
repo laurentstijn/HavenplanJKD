@@ -2,6 +2,19 @@ let geselecteerdeLigplaats = null;
 let selectedBoot = null;
 let dragging = false;
 let startX, startY;
+let editBootId = null;  // Dit wordt gebruikt om de boot te bewerken
+
+// Open de popup voor het toevoegen van een nieuwe boot
+function openPopupNew() {
+  document.getElementById('popupTitel').textContent = "Nieuwe boot toevoegen";
+  document.getElementById('bootNaam').value = "";
+  document.getElementById('bootLengte').value = "12"; // Standaard lengte
+  document.getElementById('bootBreedte').value = "4"; // Standaard breedte
+  document.getElementById('bootEigenaar').value = "";
+  editBootId = null;  // Geen id voor een nieuwe boot
+  document.getElementById('popup').style.display = 'block'; // Toon de popup
+}
+
 
 // Firebase configuratie (gebruik je eigen configuratie)
 const firebaseConfig = {
@@ -239,6 +252,27 @@ function checkLigplaats(bootX, bootY) {
   return binnenLigplaats;
 }
 
+// Open de popup voor het bewerken van een bestaande boot
+function editBoot(id) {
+  // Haal de boot uit de database
+  database.ref('boten/' + id).once('value').then(snapshot => {
+    const boot = snapshot.val();
+    if (!boot) return;
+
+    // Vul de popup met de bestaande gegevens van de boot
+    document.getElementById('popupTitel').textContent = "Boot aanpassen";
+    document.getElementById('bootNaam').value = boot.naam;
+    document.getElementById('bootLengte').value = boot.lengte;
+    document.getElementById('bootBreedte').value = boot.breedte;
+    document.getElementById('bootEigenaar').value = boot.eigenaar || "";
+
+    editBootId = id;  // Zet de id van de boot die we gaan bewerken
+    document.getElementById('popup').style.display = 'block'; // Toon de popup
+  }).catch(error => {
+    console.error("Fout bij het ophalen van de boot:", error);
+  });
+}
+
 // Boot aanpassen vanuit de lijst
 function editBoot(id) {
   // Haal de boot op uit de Firebase-database
@@ -270,6 +304,65 @@ function deleteBoot(id) {
     });
   }
 }
+// Functie voor het opslaan van de boot
+function bevestigBoot() {
+  const naam = document.getElementById('bootNaam').value.trim();
+  const lengte = document.getElementById('bootLengte').value.trim();
+  const breedte = document.getElementById('bootBreedte').value.trim();
+  const eigenaar = document.getElementById('bootEigenaar').value.trim();
+
+  if (!naam || !lengte || !breedte || !eigenaar) {
+    alert("Vul alle velden correct in.");
+    return;
+  }
+
+  if (editBootId) {
+    // Als we een boot bewerken
+    database.ref('boten/' + editBootId).once('value').then(snapshot => {
+      const boot = snapshot.val();
+      if (!boot) return;
+
+      boot.naam = naam;
+      boot.lengte = lengte;
+      boot.breedte = breedte;
+      boot.eigenaar = eigenaar;
+
+      // Werk de boot bij in de database
+      database.ref('boten/' + editBootId).set(boot, () => {
+        location.reload();  // Herlaad de pagina na opslaan
+        document.getElementById('popup').style.display = 'none'; // Sluit de popup
+      });
+    });
+  } else {
+    // Nieuwe boot toevoegen
+    const id = database.ref().child('boten').push().key;
+    const newBoot = {
+      naam: naam,
+      lengte: lengte,
+      breedte: breedte,
+      eigenaar: eigenaar,
+      status: "aanwezig",
+      x: 100,  // Standaard x-positie van de boot
+      y: 100,  // Standaard y-positie van de boot
+      ligplaats: null // Initialiseer ligplaats als null
+    };
+
+    // Voeg de nieuwe boot toe aan de database
+    database.ref('boten/' + id).set(newBoot, () => {
+      location.reload();  // Herlaad de pagina na opslaan
+      document.getElementById('popup').style.display = 'none'; // Sluit de popup
+    });
+  }
+}
+
+// Functie voor annuleren
+function annuleerBoot() {
+  document.getElementById('popup').style.display = 'none'; // Sluit de popup zonder wijzigingen
+}
+
+// Voeg de eventlisteners toe voor de knoppen in de popup
+document.getElementById('opslaanBtn').addEventListener('click', bevestigBoot);  // Wanneer je opslaat
+document.getElementById('annuleerBtn').addEventListener('click', annuleerBoot); // Wanneer je annuleert
 
 // Boot opslaan
 function saveBoot() {
