@@ -76,6 +76,17 @@ function openPopupNew(ligplaats) {
   document.getElementById('popup').style.display = 'block'; // Toon de popup
 }
 
+// Functie om de popup voor een nieuwe boot te openen
+function openPopupNew() {
+  document.getElementById('popupTitel').textContent = "Nieuwe boot toevoegen";
+  document.getElementById('bootNaam').value = "";
+  document.getElementById('bootLengte').value = "12";  // Standaard lengte
+  document.getElementById('bootBreedte').value = "4";  // Standaard breedte
+  document.getElementById('bootEigenaar').value = "";
+  editBootId = null;  // Geen id voor een nieuwe boot
+  document.getElementById('popup').style.display = 'block';  // Toon de popup
+}
+
 // Boot tekenen
 function drawBoot(svg, boot, id) {
   const group = document.createElementNS('http://www.w3.org/2000/svg', 'g');
