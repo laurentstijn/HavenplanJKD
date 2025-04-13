@@ -4,30 +4,35 @@
   <meta charset="UTF-8">
   <link rel="stylesheet" href="style.css">
   <title>Havenplan JKD</title>
- 
 </head>
 <body>
 
-<!-- SVG Haven -->
-<div id="haven-container">
-  <svg id="haven" viewBox="0 0 1000 600">
-    <!-- Steigers -->
-    <rect class="steiger" x="60" y="100" width="500" height="30" /> <!-- hoofdsteiger -->
-    <rect class="steiger" x="160" y="130" width="30" height="300" /> <!-- langssteiger 1 -->
-    <rect class="steiger" x="400" y="130" width="30" height="300" /> <!-- langssteiger 2 -->
+<!-- Hoofdelement voor de layout -->
+<div id="layout-container">
+  <!-- Haven container met SVG -->
+  <div id="haven-container">
+    <svg id="haven" viewBox="0 0 1000 600">
+      <!-- Steigers -->
+      <rect class="steiger" x="60" y="100" width="500" height="30" /> <!-- hoofdsteiger -->
+      <rect class="steiger" x="160" y="130" width="30" height="300" /> <!-- langssteiger 1 -->
+      <rect class="steiger" x="400" y="130" width="30" height="300" /> <!-- langssteiger 2 -->
 
-    <!-- Ligplaatsen -->
-    <rect class="ligplaats" id="ligplaats1" x="20" y="140" width="140" height="30" />
-    <rect class="ligplaats" id="ligplaats2" x="20" y="190" width="140" height="30" />
-    <rect class="ligplaats" id="ligplaats3" x="20" y="240" width="140" height="30" />
-    <rect class="ligplaats" id="ligplaats4" x="430" y="140" width="140" height="30" />
-    <rect class="ligplaats" id="ligplaats5" x="430" y="190" width="140" height="30" />
-    <rect class="ligplaats" id="ligplaats6" x="430" y="240" width="140" height="30" />
-   <!--   <rect class="ligplaats" id="ligplaats7" x="370" y="140" width="30" height="140" />   -->
+      <!-- Ligplaatsen -->
+      <rect class="ligplaats" id="ligplaats1" x="20" y="140" width="140" height="30" />
+      <rect class="ligplaats" id="ligplaats2" x="20" y="190" width="140" height="30" />
+      <rect class="ligplaats" id="ligplaats3" x="20" y="240" width="140" height="30" />
+      <rect class="ligplaats" id="ligplaats4" x="430" y="140" width="140" height="30" />
+      <rect class="ligplaats" id="ligplaats5" x="430" y="190" width="140" height="30" />
+      <rect class="ligplaats" id="ligplaats6" x="430" y="240" width="140" height="30" />
+    </svg>
+  </div>
 
-    <!-- Wachtzone -->
-    <rect id="wachtzone" class="wachtzone" x="1200" y="50" width="150" height="500" />
-  </svg>
+  <!-- Wachtzone als een apart element naast de SVG -->
+  <div id="wachtzone">
+    <svg width="150" height="500">
+      <rect x="0" y="0" width="150" height="500" fill="#d0e8ff" stroke="#00aaff" stroke-width="2" opacity="0.5"></rect>
+    </svg>
+  </div>
 </div>
 
 <!-- Menu -->
@@ -51,11 +56,9 @@
   <button onclick="annuleerBoot()">Annuleren</button>
 </div>
 
-
 <!-- Firebase -->
 <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-database-compat.js"></script>
-
 <script>
 const firebaseConfig = {
   apiKey: "AIzaSyD1KyhwzPqFHnXt2S1OCaWGVYXUde6mj-8",
@@ -67,9 +70,8 @@ const firebaseConfig = {
   appId: "1:126216147433:web:f23132c7c4db395368bb78"
 };
 firebase.initializeApp(firebaseConfig);
-
-  
 </script>
+
 <!-- Eigen Script -->
 <script src="script.js"></script>
 
