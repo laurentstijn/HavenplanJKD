@@ -26,6 +26,11 @@ svg {
   height: 100%;
 }
 
+#haven {
+  transform: scale(0.5); /* Verklein de inhoud van de SVG met 50% */
+  transform-origin: 0 0; /* Zorg ervoor dat de schaal begint vanaf de linkerbovenhoek */
+}
+
 /* Steigers */
 .steiger {
   fill: #c2b8a3; /* Lichtbruin */
