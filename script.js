@@ -225,8 +225,8 @@ function deleteBoot(id) {
 // Popup bevestigen
 function bevestigBoot() {
   const naam = document.getElementById('bootNaam').value.trim();
-  const lengte = parseFloat(document.getElementById('bootLengte').value.trim();
-  const breedte = parseFloat(document.getElementById('bootBreedte').value.trim();
+  const lengte = document.getElementById('bootLengte').value.trim();
+  const breedte = document.getElementById('bootBreedte').value.trim();
   const eigenaar = document.getElementById('bootEigenaar').value.trim();
 
   if (!naam) {
