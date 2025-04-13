@@ -61,13 +61,19 @@ function drawBoot(svg, boot, id) {
 // Boot in lijst tonen
 function addBootToMenu(boot, id) {
   const lijst = document.getElementById('botenLijst');
+  
+  // Maak een nieuw item voor de botenlijst
   const div = document.createElement('div');
   div.className = 'boot-item';
-  div.innerHTML = `<strong>${boot.naam}</strong> (${boot.eigenaar || "Geen eigenaar"})
+  div.innerHTML = `
+    <strong>${boot.naam}</strong> (${boot.eigenaar || "Geen eigenaar"})
     <button onclick="editBoot('${id}')">✏️</button>
-    <button onclick="deleteBoot('${id}')">🗑️</button>`;
+    <button onclick="deleteBoot('${id}')">🗑️</button>
+  `;
+  
   lijst.appendChild(div);
 }
+
 
 // Slepen starten
 function startDrag(e) {
