@@ -59,8 +59,8 @@ function openPopupNew(ligplaats) {
   // Vul de velden van de popup met standaardwaarden
   document.getElementById('popupTitel').textContent = "Nieuwe boot toevoegen";
   document.getElementById('bootNaam').value = "";
-  document.getElementById('bootLengte').value = "12"; // Standaard lengte
-  document.getElementById('bootBreedte').value = "4"; // Standaard breedte
+  document.getElementById('bootLengte').value = ""; // Standaard lengte
+  document.getElementById('bootBreedte').value = ""; // Standaard breedte
   document.getElementById('bootEigenaar').value = "";
 
   // Verkrijg de x en y waarden van de ligplaats
