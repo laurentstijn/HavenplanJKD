@@ -383,8 +383,8 @@ function annuleerBoot() {
 function openPopupNew() {
   document.getElementById('popupTitel').textContent = "Nieuwe boot toevoegen";
   document.getElementById('bootNaam').value = "";
-  document.getElementById('bootLengte').value = "12"; // Standaard lengte
-  document.getElementById('bootBreedte').value = "4"; // Standaard breedte
+  document.getElementById('bootLengte').value = ""; // Standaard lengte
+  document.getElementById('bootBreedte').value = ""; // Standaard breedte
   document.getElementById('bootEigenaar').value = "";
   editBootId = null;  // Geen id voor een nieuwe boot
   document.getElementById('popup').style.display = 'block'; // Toon de popup
