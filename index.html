@@ -76,22 +76,24 @@ firebase.initializeApp(firebaseConfig);
 
   <!-- JavaScript -->
   <script>
-    window.addEventListener('resize', updateWachtzonePosition); // Zorg ervoor dat de positie opnieuw wordt berekend bij het aanpassen van het scherm
+window.addEventListener('resize', updateWachtzonePosition); // Zorg ervoor dat de positie opnieuw wordt berekend bij het aanpassen van het scherm
 
-    function updateWachtzonePosition() {
-      const containerWidth = document.body.clientWidth; // Verkrijg de breedte van de container (je kunt dit ook aanpassen naar een specifiek container-element)
-      const percentageFromRight = 75; // Stel hier het percentage vanaf de rechterkant in (bijvoorbeeld 10%)
+function updateWachtzonePosition() {
+  const havenContainer = document.getElementById('haven-container'); // Verkrijg de breedte van de haven-container
+  const containerWidth = havenContainer.clientWidth; // Breedte van de haven-container
+  const percentageFromRight = 10; // Stel hier het percentage vanaf de rechterkant in (bijvoorbeeld 10%)
 
-      // Bereken de nieuwe `x`-waarde van de wachtzone
-      const newX = containerWidth * (1 - percentageFromRight / 100) - 150; // De breedte van de wachtzone is 150px
+  // Bereken de nieuwe `x`-waarde van de wachtzone
+  const newX = containerWidth * (1 - percentageFromRight / 100) - 150; // De breedte van de wachtzone is 150px
 
-      // Update de `x`-positie van de wachtzone
-      const wachtzone = document.getElementById('wachtzone');
-      wachtzone.setAttribute('x', newX);
-    }
+  // Update de `x`-positie van de wachtzone binnen de #haven-container
+  const wachtzone = document.getElementById('wachtzone');
+  wachtzone.setAttribute('x', newX);
+}
 
-    // Roep de functie aan bij het laden van de pagina om de startpositie in te stellen
-    updateWachtzonePosition();
+// Roep de functie aan bij het laden van de pagina om de startpositie in te stellen
+updateWachtzonePosition();
+
   </script>
 </body>
 </html>
