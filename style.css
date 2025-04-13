@@ -8,7 +8,10 @@ body {
 }
 
 #haven-container {
-  flex: 3;
+  width: 80%;          /* Breedte van 80% van het scherm */
+  height: 50vh;        /* Hoogte van 50% van de viewport */
+  padding: 10px;
+  margin: 20px auto;   /* Centrerend met marge aan beide zijden */
   background: #dbe9f4;
 }
 
