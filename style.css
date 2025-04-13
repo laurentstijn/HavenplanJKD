@@ -102,7 +102,7 @@ svg {
 .popup-buttons button {
   width: 48%;
 }
-#haven {
+/*#haven {
   transform: scale(0.5); /* Verklein de inhoud van de SVG met 50% */
-  transform-origin: 0 0; /* Zorg ervoor dat de schaal begint vanaf de linkerbovenhoek */
-}
+ /* transform-origin: 0 0; /* Zorg ervoor dat de schaal begint vanaf de linkerbovenhoek */
+
