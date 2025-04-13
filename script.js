@@ -3,9 +3,22 @@ let selectedBoot = null;
 let dragging = false;
 let startX, startY;
 
+// Firebase configuratie (gebruik je eigen configuratie)
+const firebaseConfig = {
+  apiKey: "AIzaSyD1KyhwzPqFHnXt2S1OCaWGVYXUde6mj-8",
+  authDomain: "havenplan-jkd.firebaseapp.com",
+  databaseURL: "https://havenplan-jkd-default-rtdb.europe-west1.firebasedatabase.app",
+  projectId: "havenplan-jkd",
+  storageBucket: "havenplan-jkd.firebasestorage.app",
+  messagingSenderId: "126216147433",
+  appId: "1:126216147433:web:f23132c7c4db395368bb78"
+};
+firebase.initializeApp(firebaseConfig);
+// Verkrijg toegang tot de database
+const database = firebase.database();
 
 
-// Boten laden
+// Functie om de boten uit Firebase te laden
 function loadBoten() {
   const svg = document.getElementById('haven');
   const lijst = document.getElementById('botenLijst');
@@ -15,9 +28,9 @@ function loadBoten() {
   database.ref('boten').once('value').then(snapshot => {
     const data = snapshot.val();
     
-    // Controleer of de data correct wordt opgehaald
+    // Controleer of er gegevens zijn en voeg boten toe aan de lijst en SVG
     if (data) {
-      console.log("Boten geladen:", data); // Dit helpt bij het debuggen
+      console.log("Boten geladen:", data); // Debug: Bekijk de geladen boten
       Object.keys(data).forEach(id => {
         drawBoot(svg, data[id], id); // Voeg de boot toe aan de SVG
         addBootToMenu(data[id], id);  // Voeg de boot toe aan de botenlijst
@@ -211,6 +224,22 @@ function endDrag(e) {
   }
 }
 
+// Controleer of de boot in een ligplaats valt
+function checkLigplaats(bootX, bootY) {
+  let binnenLigplaats = false;
+  document.querySelectorAll('.ligplaats').forEach(ligplaats => {
+    const lx = parseFloat(ligplaats.getAttribute('x'));
+    const ly = parseFloat(ligplaats.getAttribute('y'));
+    const lw = parseFloat(ligplaats.getAttribute('width'));
+    const lh = parseFloat(ligplaats.getAttribute('height'));
+
+    if (bootX >= lx && bootX <= lx + lw && bootY >= ly && bootY <= ly + lh) {
+      binnenLigplaats = true;
+    }
+  });
+  return binnenLigplaats;
+}
+
 // Boot opslaan
 function saveBoot() {
   if (!selectedBoot) return;
@@ -218,20 +247,23 @@ function saveBoot() {
   const bootRect = group.querySelector('.boot');
   const bootLabel = group.querySelector('text');
 
+  // Haal de bestaande boot op uit Firebase
   database.ref('boten/' + id).once('value').then(snapshot => {
     const oudeBoot = snapshot.val() || {};
 
+    // Update de boot met de nieuwe gegevens
     const updatedBoot = {
       naam: bootLabel.textContent || "Boot",
       lengte: parseFloat(bootRect.getAttribute('width')) / 5,
       breedte: parseFloat(bootRect.getAttribute('height')) / 5,
-      eigenaar: oudeBoot.eigenaar || "",     // <<<< eigenaar behouden
-      status: "aanwezig",
+      eigenaar: oudeBoot.eigenaar || "",     // Bewaar de eigenaar
+      status: "aanwezig",  // Je kunt de status ook aanpassen indien nodig
       x: parseFloat(bootRect.getAttribute('x')),
       y: parseFloat(bootRect.getAttribute('y')),
-      ligplaats: oudeBoot.ligplaats || ""
+      ligplaats: oudeBoot.ligplaats || "" // Bewaar de ligplaats als deze bestaat
     };
 
+    // Sla de gewijzigde boot op in de Firebase-database
     database.ref('boten/' + id).set(updatedBoot);
   });
 }
