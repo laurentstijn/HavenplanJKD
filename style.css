@@ -13,7 +13,7 @@ body {
 }
 
 #menu {
-  witdh: 10%;
+  width: 10%;
   flex: 0 0 auto;
   background: white;
   padding: 20px;
@@ -39,13 +39,8 @@ svg {
   cursor: pointer;
 }
 
-/* Wachtzone */
-#wachtzone {
-  position: absolute; /* Zorgt ervoor dat de wachtzone relatief is aan de container */
-  right: 30%; /* Plaats de wachtzone 10% van de rechterkant */
-  top: 50px;
-  width: 150px;
-  height: 500px;
+/* Wachtzone - Zorg ervoor dat de CSS alleen styling regelt */
+.wachtzone {
   fill: #d0e8ff;
   stroke: #00aaff;
   stroke-width: 2;
@@ -107,6 +102,7 @@ svg {
 .popup-buttons button {
   width: 48%;
 }
+
 /*#haven {
   transform: scale(0.5); /* Verklein de inhoud van de SVG met 50% */
  /* transform-origin: 0 0; /* Zorg ervoor dat de schaal begint vanaf de linkerbovenhoek */
