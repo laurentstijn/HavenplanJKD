@@ -240,6 +240,38 @@ function checkLigplaats(bootX, bootY) {
   return binnenLigplaats;
 }
 
+// Boot aanpassen vanuit de lijst
+function editBoot(id) {
+  // Haal de boot op uit de Firebase-database
+  database.ref('boten/' + id).once('value').then(snapshot => {
+    const boot = snapshot.val();
+    if (!boot) return;
+
+    // Vul de popup met de huidige gegevens van de boot
+    document.getElementById('popupTitel').textContent = "Boot aanpassen";
+    document.getElementById('bootNaam').value = boot.naam;
+    document.getElementById('bootLengte').value = boot.lengte;
+    document.getElementById('bootBreedte').value = boot.breedte;
+    document.getElementById('bootEigenaar').value = boot.eigenaar || "";
+
+    editBootId = id;  // Stel de id in voor het bewerken
+    document.getElementById('popup').style.display = 'block'; // Open de popup
+  });
+}
+
+// Boot verwijderen
+function deleteBoot(id) {
+  if (confirm("Weet je zeker dat je deze boot wilt verwijderen?")) {
+    // Verwijder de boot uit de Firebase-database
+    database.ref('boten/' + id).remove().then(() => {
+      console.log("Boot verwijderd:", id);
+      location.reload();  // Herlaad de pagina na het verwijderen van de boot
+    }).catch(error => {
+      console.error("Fout bij verwijderen van boot:", error);
+    });
+  }
+}
+
 // Boot opslaan
 function saveBoot() {
   if (!selectedBoot) return;
