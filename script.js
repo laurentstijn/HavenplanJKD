@@ -1,9 +1,7 @@
 let geselecteerdeLigplaats = null;
 let selectedBoot = null;
-let editBootId = null;
 let dragging = false;
 let startX, startY;
-const database = firebase.database();
 
 // Boten laden
 function loadBoten() {
@@ -27,6 +25,7 @@ function drawBoot(svg, boot, id) {
   group.setAttribute('class', 'bootgroep');
   group.setAttribute('data-id', id);
   group.addEventListener('mousedown', startDrag);
+  group.addEventListener('touchstart', startDrag);  // Touch-event voor mobiel
 
   const rect = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
   rect.setAttribute('x', boot.x);
@@ -62,6 +61,17 @@ function addBootToMenu(boot, id) {
 
 // Slepen starten
 function startDrag(e) {
+  e.preventDefault();  // Voorkom andere acties zoals tekst selecteren
+
+  // Detecteer touch of muis
+  if (e.type === 'touchstart') {
+    startX = e.touches[0].clientX;
+    startY = e.touches[0].clientY;
+  } else {
+    startX = e.clientX;
+    startY = e.clientY;
+  }
+
   document.querySelectorAll('.boot').forEach(b => b.classList.remove('selected'));
   e.target.classList.add('selected');
   selectedBoot = {
@@ -69,21 +79,33 @@ function startDrag(e) {
     id: e.target.parentNode.getAttribute('data-id')
   };
 
-  startX = e.clientX;
-  startY = e.clientY;
   dragging = true;
 
+  // Voeg touch en mouse events toe
   document.addEventListener('mousemove', drag);
   document.addEventListener('mouseup', endDrag);
+  document.addEventListener('touchmove', drag);  // Voor mobiel
+  document.addEventListener('touchend', endDrag); // Voor mobiel
 }
 
 // Tijdens slepen
 function drag(e) {
   if (!selectedBoot) return;
+
+  let clientX, clientY;
+  // Controleer welk type event er is (touch of mouse)
+  if (e.type === 'touchmove') {
+    clientX = e.touches[0].clientX;
+    clientY = e.touches[0].clientY;
+  } else {
+    clientX = e.clientX;
+    clientY = e.clientY;
+  }
+
   const svg = document.getElementById('haven');
   const pt = svg.createSVGPoint();
-  pt.x = e.clientX;
-  pt.y = e.clientY;
+  pt.x = clientX;
+  pt.y = clientY;
   const cursorpt = pt.matrixTransform(svg.getScreenCTM().inverse());
   const boot = selectedBoot.group.querySelector('.boot');
   const label = selectedBoot.group.querySelector('text');
@@ -98,6 +120,8 @@ function endDrag(e) {
   dragging = false;
   document.removeEventListener('mousemove', drag);
   document.removeEventListener('mouseup', endDrag);
+  document.removeEventListener('touchmove', drag);  // Verwijder touchmove
+  document.removeEventListener('touchend', endDrag); // Verwijder touchend
 
   if (!selectedBoot) return;
 
@@ -121,7 +145,7 @@ function endDrag(e) {
       document.getElementById('popup').style.display = 'block';
     });
   } else {
-    // Sleepbeweging ➔ controleren positie
+    // Sleepbeweging ➔ controleer positie
     const bootRect = selectedBoot.group.querySelector('.boot');
     const label = selectedBoot.group.querySelector('text');
     const bootX = parseFloat(bootRect.getAttribute('x'));
@@ -146,8 +170,6 @@ function endDrag(e) {
 
     if (!binnenLigplaats &&
         !(bootX >= wx && bootX <= wx + ww && bootY >= wy && bootY <= wy + wh)) {
-
-      // Tel hoeveel boten al in de wachtzone zitten
       let count = 0;
       document.querySelectorAll('.boot').forEach(b => {
         const bx = parseFloat(b.getAttribute('x'));
@@ -157,7 +179,6 @@ function endDrag(e) {
         }
       });
 
-      // Zet boot onder elkaar in de wachtzone
       const spacing = 30; // afstand tussen boten
       const newX = wx + 10;
       const newY = wy + 10 + count * spacing;
@@ -171,7 +192,6 @@ function endDrag(e) {
     saveBoot();
   }
 }
-
 
 // Boot opslaan
 function saveBoot() {
@@ -198,109 +218,5 @@ function saveBoot() {
   });
 }
 
-// Boot aanpassen vanuit menu
-function editBoot(id) {
-  database.ref('boten/' + id).once('value').then(snapshot => {
-    const boot = snapshot.val();
-    if (!boot) return;
-
-    geselecteerdeLigplaats = null;
-    editBootId = id;
-    document.getElementById('popupTitel').textContent = "Boot aanpassen";
-    document.getElementById('bootNaam').value = boot.naam;
-    document.getElementById('bootLengte').value = boot.lengte;
-    document.getElementById('bootBreedte').value = boot.breedte;
-    document.getElementById('bootEigenaar').value = boot.eigenaar || "";
-    document.getElementById('popup').style.display = 'block';
-  });
-}
-
-// Boot verwijderen
-function deleteBoot(id) {
-  if (confirm("Weet je zeker dat je deze boot wilt verwijderen?")) {
-    database.ref('boten/' + id).remove(() => location.reload());
-  }
-}
-
-// Popup bevestigen
-function bevestigBoot() {
-  const naam = document.getElementById('bootNaam').value.trim();
-  const lengte = document.getElementById('bootLengte').value.trim();
-  const breedte = document.getElementById('bootBreedte').value.trim();
-  const eigenaar = document.getElementById('bootEigenaar').value.trim();
-
-  if (!naam) {
-    alert("Vul alle velden correct in.");
-    return;
-  }
-
-  if (editBootId) {
-    // Bestaande boot aanpassen
-    database.ref('boten/' + editBootId).once('value').then(snapshot => {
-      const boot = snapshot.val();
-      if (!boot) return;
-
-      boot.naam = naam;
-      boot.lengte = lengte;
-      boot.breedte = breedte;
-      boot.eigenaar = eigenaar;
-
-      database.ref('boten/' + editBootId).set(boot, () => location.reload());
-    });
-  } else {
-    // Nieuwe boot toevoegen
-    const id = database.ref().child('boten').push().key;
-    const newBoot = {
-      naam: naam,
-      lengte: lengte,
-      breedte: breedte,
-      eigenaar: eigenaar,
-      status: "aanwezig",
-      x: parseFloat(geselecteerdeLigplaats.getAttribute('x')) + 10,
-      y: parseFloat(geselecteerdeLigplaats.getAttribute('y')) + 5,
-      ligplaats: geselecteerdeLigplaats.id
-    };
-    database.ref('boten/' + id).set(newBoot, () => location.reload());
-  }
-}
-
-// Popup annuleren
-function annuleerBoot() {
-  document.getElementById('popup').style.display = 'none';
-}
-
-// Ligplaatsen klikbaar maken
-document.querySelectorAll('.ligplaats').forEach(ligplaats => {
-  ligplaats.addEventListener('click', (e) => {
-    e.stopPropagation();
-    geselecteerdeLigplaats = ligplaats;
-    editBootId = null;
-    document.getElementById('popupTitel').textContent = "Nieuwe boot toevoegen";
-    document.getElementById('bootNaam').value = "";
-    document.getElementById('bootLengte').value = "";
-    document.getElementById('bootBreedte').value = "";
-    document.getElementById('bootEigenaar').value = "";
-    document.getElementById('popup').style.display = 'block';
-  });
-});
-
-// Ligplaats naam labels tekenen (linkerbovenhoek)
-function tekenLigplaatsNamen() {
-  const svg = document.getElementById('haven');
-  document.querySelectorAll('.ligplaats').forEach(ligplaats => {
-    const lx = parseFloat(ligplaats.getAttribute('x'));
-    const ly = parseFloat(ligplaats.getAttribute('y'));
-
-    const label = document.createElementNS('http://www.w3.org/2000/svg', 'text');
-    label.setAttribute('x', lx + 5);           // Iets rechts van de linkerrand
-    label.setAttribute('y', ly + 12);           // Iets onder de bovenrand
-    label.setAttribute('text-anchor', 'start'); // Tekst links uitlijnen
-    label.setAttribute('class', 'label');
-    label.textContent = ligplaats.id;           // Bijvoorbeeld: ligplaats1
-
-    svg.appendChild(label);
-  });
-}
-
-// Start
-loadBoten();
+// Start de botenladen bij pagina-laden
+window.onload = loadBoten;
