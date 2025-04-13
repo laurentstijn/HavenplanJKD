@@ -80,7 +80,7 @@ firebase.initializeApp(firebaseConfig);
 
     function updateWachtzonePosition() {
       const containerWidth = document.body.clientWidth; // Verkrijg de breedte van de container (je kunt dit ook aanpassen naar een specifiek container-element)
-      const percentageFromRight = 10; // Stel hier het percentage vanaf de rechterkant in (bijvoorbeeld 10%)
+      const percentageFromRight = 25; // Stel hier het percentage vanaf de rechterkant in (bijvoorbeeld 10%)
 
       // Bereken de nieuwe `x`-waarde van de wachtzone
       const newX = containerWidth * (1 - percentageFromRight / 100) - 150; // De breedte van de wachtzone is 150px
