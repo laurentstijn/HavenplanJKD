@@ -7,17 +7,27 @@ let startX, startY;
 function loadBoten() {
   const svg = document.getElementById('haven');
   const lijst = document.getElementById('botenLijst');
-  lijst.innerHTML = '';
+  lijst.innerHTML = ''; // Maak de lijst leeg voordat nieuwe boten worden toegevoegd
+
+  // Haal boten op uit Firebase
   database.ref('boten').once('value').then(snapshot => {
     const data = snapshot.val();
+    
+    // Controleer of de data correct wordt opgehaald
     if (data) {
+      console.log("Boten geladen:", data); // Dit helpt bij het debuggen
       Object.keys(data).forEach(id => {
-        drawBoot(svg, data[id], id);
-        addBootToMenu(data[id], id);
+        drawBoot(svg, data[id], id); // Voeg de boot toe aan de SVG
+        addBootToMenu(data[id], id);  // Voeg de boot toe aan de botenlijst
       });
+    } else {
+      console.log("Geen boten gevonden in de database");
     }
+  }).catch(error => {
+    console.error("Fout bij het laden van boten:", error);
   });
 }
+
 
 // Boot tekenen
 function drawBoot(svg, boot, id) {
