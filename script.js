@@ -1,8 +1,8 @@
 let geselecteerdeLigplaats = null;
 let selectedBoot = null;
+let editBootId = null;
 let dragging = false;
 let startX, startY;
-
 const database = firebase.database();
 
 // Boten laden
@@ -27,7 +27,7 @@ function drawBoot(svg, boot, id) {
   group.setAttribute('class', 'bootgroep');
   group.setAttribute('data-id', id);
   group.addEventListener('mousedown', startDrag);
-  group.addEventListener('touchstart', startDrag);  // Toevoegen voor touch-event
+  group.addEventListener('touchstart', startDrag);  // Voeg touchstart toe
 
   const rect = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
   rect.setAttribute('x', boot.x);
@@ -50,9 +50,22 @@ function drawBoot(svg, boot, id) {
   svg.appendChild(group);
 }
 
+// Boot in lijst tonen
+function addBootToMenu(boot, id) {
+  const lijst = document.getElementById('botenLijst');
+  const div = document.createElement('div');
+  div.className = 'boot-item';
+  div.innerHTML = `<strong>${boot.naam}</strong> (${boot.eigenaar || "Geen eigenaar"})
+    <button onclick="editBoot('${id}')">✏️</button>
+    <button onclick="deleteBoot('${id}')">🗑️</button>`;
+  lijst.appendChild(div);
+}
+
 // Slepen starten
 function startDrag(e) {
-  // Voor touchevents gebruik `touchstart` om de startpositie op te halen
+  e.preventDefault(); // Voorkom ongewenste gedrag (bijv. tekst selecteren)
+
+  // Voor touch gebruiken we touchstart om de startpositie op te halen
   if (e.type === "touchstart") {
     startX = e.touches[0].clientX;
     startY = e.touches[0].clientY;
@@ -73,8 +86,8 @@ function startDrag(e) {
   // Voeg event listeners toe voor bewegen en stoppen van het slepen
   document.addEventListener('mousemove', drag);
   document.addEventListener('mouseup', endDrag);
-  document.addEventListener('touchmove', drag);  // Touchmove voor mobiel
-  document.addEventListener('touchend', endDrag); // Touchend voor mobiel
+  document.addEventListener('touchmove', drag);  // Voeg touchmove voor mobiel toe
+  document.addEventListener('touchend', endDrag); // Voeg touchend voor mobiel toe
 }
 
 // Tijdens slepen
@@ -163,7 +176,6 @@ function saveBoot() {
     database.ref('boten/' + id).set(updatedBoot);
   });
 }
-
 
 // Boot aanpassen vanuit menu
 function editBoot(id) {
