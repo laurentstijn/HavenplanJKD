@@ -62,7 +62,6 @@ function addBootToMenu(boot, id) {
 
 // Slepen starten
 function startDrag(e) {
-  // Voorkom dat meerdere boten geselecteerd worden
   document.querySelectorAll('.boot').forEach(b => b.classList.remove('selected'));
   e.target.classList.add('selected');
   selectedBoot = {
@@ -70,21 +69,10 @@ function startDrag(e) {
     id: e.target.parentNode.getAttribute('data-id')
   };
 
-  // Sla de offset op tussen de muis en de boot bij de start van het slepen
-  const rect = selectedBoot.group.querySelector('.boot');
-  const bootX = rect.getAttribute('x');
-  const bootY = rect.getAttribute('y');
-  const offsetX = e.clientX - bootX;
-  const offsetY = e.clientY - bootY;
-
-  // Sla de muis- en offset-waarden op voor het slepen
-  selectedBoot.offsetX = offsetX;
-  selectedBoot.offsetY = offsetY;
   startX = e.clientX;
   startY = e.clientY;
   dragging = true;
 
-  // Start de slepen-beweging
   document.addEventListener('mousemove', drag);
   document.addEventListener('mouseup', endDrag);
 }
@@ -92,26 +80,17 @@ function startDrag(e) {
 // Tijdens slepen
 function drag(e) {
   if (!selectedBoot) return;
-
   const svg = document.getElementById('haven');
   const pt = svg.createSVGPoint();
   pt.x = e.clientX;
   pt.y = e.clientY;
-
-  // Transformeer de muispositie naar SVG-coördinaten
   const cursorpt = pt.matrixTransform(svg.getScreenCTM().inverse());
-
-  // Bereken de nieuwe positie van de boot, rekening houdend met de offset
-  const newX = cursorpt.x - selectedBoot.offsetX;
-  const newY = cursorpt.y - selectedBoot.offsetY;
-
-  // Pas de boot- en labelpositie aan
   const boot = selectedBoot.group.querySelector('.boot');
   const label = selectedBoot.group.querySelector('text');
-  boot.setAttribute('x', newX);
-  boot.setAttribute('y', newY);
-  label.setAttribute('x', newX + 5);
-  label.setAttribute('y', newY + 20);
+  boot.setAttribute('x', cursorpt.x - 30);
+  boot.setAttribute('y', cursorpt.y - 10);
+  label.setAttribute('x', cursorpt.x - 25);
+  label.setAttribute('y', cursorpt.y + 5);
 }
 
 // Slepen stoppen
@@ -142,7 +121,7 @@ function endDrag(e) {
       document.getElementById('popup').style.display = 'block';
     });
   } else {
-    // Controleer de nieuwe positie van de boot in relatie tot ligplaatsen of wachtzone
+    // Sleepbeweging ➔ controleren positie
     const bootRect = selectedBoot.group.querySelector('.boot');
     const label = selectedBoot.group.querySelector('text');
     const bootX = parseFloat(bootRect.getAttribute('x'));
@@ -178,7 +157,7 @@ function endDrag(e) {
         }
       });
 
-      // Zet de boot onder elkaar in de wachtzone
+      // Zet boot onder elkaar in de wachtzone
       const spacing = 30; // afstand tussen boten
       const newX = wx + 10;
       const newY = wy + 10 + count * spacing;
@@ -192,6 +171,7 @@ function endDrag(e) {
     saveBoot();
   }
 }
+
 
 // Boot opslaan
 function saveBoot() {
