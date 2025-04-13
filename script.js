@@ -46,6 +46,35 @@ function loadBoten() {
   });
 }
 
+// Functie om ligplaatsen klikbaar te maken
+document.querySelectorAll('.ligplaats').forEach(ligplaats => {
+  ligplaats.addEventListener('click', function(e) {
+    e.stopPropagation(); // Voorkom dat andere elementen reageren op de klik
+    openPopupNew(ligplaats); // Open de popup voor een nieuwe boot
+  });
+});
+
+// Functie om de popup voor een nieuwe boot te openen
+function openPopupNew(ligplaats) {
+  // Vul de velden van de popup met standaardwaarden
+  document.getElementById('popupTitel').textContent = "Nieuwe boot toevoegen";
+  document.getElementById('bootNaam').value = "";
+  document.getElementById('bootLengte').value = "12"; // Standaard lengte
+  document.getElementById('bootBreedte').value = "4"; // Standaard breedte
+  document.getElementById('bootEigenaar').value = "";
+
+  // Verkrijg de x en y waarden van de ligplaats
+  const x = parseFloat(ligplaats.getAttribute('x'));
+  const y = parseFloat(ligplaats.getAttribute('y'));
+
+  // Stuur de positie door naar de functie voor opslaan
+  editBootId = null; // Geen boot-id (voor nieuwe boot)
+  selectedLigplaats = ligplaats; // Sla de geselecteerde ligplaats op
+
+  // Zet de nieuwe boot op de ligplaats (standaard positie)
+  document.getElementById('popup').style.display = 'block'; // Toon de popup
+}
+
 // Boot tekenen
 function drawBoot(svg, boot, id) {
   const group = document.createElementNS('http://www.w3.org/2000/svg', 'g');
@@ -294,7 +323,7 @@ function deleteBoot(id) {
     });
   }
 }
-// Functie voor het opslaan van de boot
+// Functie voor het opslaan van een nieuwe boot
 function bevestigBoot() {
   const naam = document.getElementById('bootNaam').value.trim();
   const lengte = document.getElementById('bootLengte').value.trim();
@@ -320,7 +349,7 @@ function bevestigBoot() {
       // Werk de boot bij in de database
       database.ref('boten/' + editBootId).set(boot, () => {
         location.reload();  // Herlaad de pagina na opslaan
-        document.getElementById('popup').style.display = 'none'; // Sluit de popup
+        document.getElementById('popup').style.display = 'none';  // Sluit de popup
       });
     });
   } else {
@@ -332,15 +361,15 @@ function bevestigBoot() {
       breedte: breedte,
       eigenaar: eigenaar,
       status: "aanwezig",
-      x: 100,  // Standaard x-positie van de boot
-      y: 100,  // Standaard y-positie van de boot
-      ligplaats: null // Initialiseer ligplaats als null
+      x: parseFloat(selectedLigplaats.getAttribute('x')), // Stel de x-positie in
+      y: parseFloat(selectedLigplaats.getAttribute('y')), // Stel de y-positie in
+      ligplaats: selectedLigplaats.id // Sla de ligplaats-id op
     };
 
     // Voeg de nieuwe boot toe aan de database
     database.ref('boten/' + id).set(newBoot, () => {
       location.reload();  // Herlaad de pagina na opslaan
-      document.getElementById('popup').style.display = 'none'; // Sluit de popup
+      document.getElementById('popup').style.display = 'none';  // Sluit de popup
     });
   }
 }
